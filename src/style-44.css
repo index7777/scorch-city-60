@@ -1,0 +1,27 @@
+/* v14.2.2 QA — B7/B12-B16 bug-surface cleanup */
+.city-header .world-map-summary-v74{
+  position:static;
+  inset:auto;
+  transform:none;
+  pointer-events:none;
+  z-index:auto;
+  max-width:min(440px,48%);
+  margin-left:auto;
+  display:grid;
+  gap:2px;
+  padding:8px 10px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(9,13,16,.58);
+  border-radius:8px;
+  box-shadow:none;
+}
+.city-header .world-map-summary-v74 b{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.city-header .world-map-summary-v74 span,
+.city-header .world-map-summary-v74 em{font-size:11px;line-height:1.35;opacity:.78;font-style:normal}
+
+#actionCenterContent .location-scene[hidden]{display:none!important}
+#actionCenterContent .action-pane:has(> h3:first-child){min-height:0}
+
+@media (max-width:1279px){
+ .city-header .world-map-summary-v74{max-width:100%;margin:8px 0 0;width:100%}
+}
