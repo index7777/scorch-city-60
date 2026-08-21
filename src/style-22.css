@@ -1,0 +1,9 @@
+/* v14.2.2 QA — parallel field subtask planning */
+.parallel-work-panel{margin-top:14px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:10px;background:rgba(9,15,19,.52)}
+.parallel-stop-list{display:grid;gap:10px;margin-top:10px}
+.parallel-stop{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.025);min-width:0}
+.parallel-stop-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.parallel-stop-head span{font-size:10px;letter-spacing:.12em;opacity:.62}.parallel-stop-head h4{margin:2px 0 0}.parallel-stop-head>b{font-size:12px;white-space:nowrap}
+.parallel-task-list{display:grid;gap:6px}.parallel-task{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(120px,.9fr) auto;gap:8px;align-items:center;padding:8px;border-radius:7px;background:rgba(255,255,255,.025)}
+.parallel-task>div{display:flex;flex-direction:column;min-width:0}.parallel-task small{opacity:.64;margin-top:2px}.parallel-task select{min-width:0;width:100%}.parallel-task>span{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+@media (max-width:760px){.parallel-stop-head{flex-direction:column}.parallel-task{grid-template-columns:1fr}.parallel-task select{width:100%}.parallel-task>span{justify-self:start}}
