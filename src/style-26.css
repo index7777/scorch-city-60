@@ -1,0 +1,5 @@
+/* v14.2.2 QA — field tool charging / timed maintenance */
+.tool-charge-box{margin:12px 0;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(8,14,18,.5);min-width:0}
+.tool-charge-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tool-charge-actions button{min-width:0;max-width:100%;white-space:normal}
+@media (max-width:760px){.tool-charge-actions{display:grid;grid-template-columns:1fr}.tool-charge-actions button{width:100%}}
