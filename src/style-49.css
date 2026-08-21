@@ -1,0 +1,21 @@
+/* v14.2.2 QA — U8-U16 / X31-X32 polish */
+.action-steps .action-step.noninteractive-v81{pointer-events:none;cursor:default;user-select:none}
+.action-steps .action-step.noninteractive-v81:not(.active):not(.done){opacity:.58}
+.action-steps .action-step.noninteractive-v81.active{outline:1px solid currentColor;outline-offset:2px}
+
+/* U12: rebalance the entry composition around one centered decision column. */
+.demo-entry__content{grid-template-columns:minmax(0,1fr)!important;align-content:center;justify-items:center;gap:clamp(22px,3vw,40px);max-width:980px!important;margin:0 auto;text-align:center}
+.demo-entry__copy,.demo-entry__menu{width:min(100%,720px);max-width:720px;margin-inline:auto}
+.demo-entry__copy h1,.demo-entry__subtitle,.demo-entry__meta{margin-inline:auto}
+.demo-entry__menu{justify-self:center!important}
+
+/* U13/U16: readiness is readable; unavailable continue is visibly secondary. */
+.demo-entry__status{font-size:clamp(1rem,1.2vw,1.2rem)!important;font-weight:700;letter-spacing:.04em;opacity:1!important}
+#demoContinue:disabled{opacity:.38;filter:saturate(.2);cursor:not-allowed;box-shadow:none}
+
+/* U14/U15: lightweight feedback without arcade-like effects. */
+.count-changing-v81{display:inline-block;animation:countPulseV81 .32s ease-out}
+@keyframes countPulseV81{0%{transform:translateY(2px);opacity:.68}55%{transform:translateY(-1px);opacity:1}100%{transform:translateY(0);opacity:1}}
+
+/* Keep naming/step polish compact on narrow layouts. */
+@media (max-width:900px){.demo-entry__content{padding-inline:18px}.action-steps{overflow-x:auto}.action-steps .action-step{white-space:nowrap}}
