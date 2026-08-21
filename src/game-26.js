@@ -69,7 +69,7 @@ craft=function(id){
  const t=craftTimeStatusV26(c);if(t.problems.length)return toast(t.problems[0]);
  const pack=t.ex?.pack||null,mode=pack?.mode||'';
  _craftV26(id);
- if(!spendWorldTimeV26(t.work.hours,{label:`製作／工程：${c.name}`,coolingPack:t.work.environment==='outdoor'?pack:null,coolingMode:mode}))return;
+ spendWorldTimeV26(t.work.hours,{label:`製作／工程：${c.name}`,coolingPack:t.work.environment==='outdoor'?pack:null,coolingMode:mode});
  ensurePowerStateV24();saveGame(false);render();openCraft();
 };
 
@@ -114,6 +114,16 @@ advance=function(){
 };
 
 const _renderV26=render;
-render=function(){ensureWorldClockV26();_renderV26();if($('hours'))$('hours').textContent=state.day>=30?`${currentPeriodHoursLeftV26().toFixed(1)}h`:$('hours').textContent};
+render=function(){ensureWorldClockV26();_renderV26();if($('hours')&&state.day>=30)$('hours').textContent=`${currentPeriodHoursLeftV26().toFixed(1)}h`};
+
+function lateBindV26(id,handler){
+ const el=$(id);if(!el||el.dataset.v26LateBound)return;el.dataset.v26LateBound='1';
+ el.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();handler(e)},true);
+}
+lateBindV26('craftBtn',()=>openCraft());
+lateBindV26('inventoryBtn',()=>openInventory());
+lateBindV26('restBtn',()=>advance());
+lateBindV26('baseMgmtBtn',()=>openBaseMgmt());
+lateBindV26('actionCenterBtn',()=>openActionCenter());
 
 ensureWorldClockV26();
