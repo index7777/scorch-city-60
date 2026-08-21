@@ -1,0 +1,12 @@
+/* v14.2.2 QA — power logistics / equipment custody */
+.power-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 14px}
+.power-source{display:grid;gap:3px;padding:10px;border:1px solid rgba(123,150,163,.18);background:#081014}
+.power-source.available{border-color:rgba(86,190,124,.34);background:rgba(19,63,40,.16)}
+.power-source b{font-size:12px}.power-source span{font-size:16px;font-variant-numeric:tabular-nums}.power-source small{font-size:10px;color:#82959e}
+.equipment-instance-list{display:grid;gap:8px;margin:8px 0 12px}
+.equipment-instance{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(160px,.7fr) minmax(190px,.85fr);gap:10px;align-items:center;padding:10px;border:1px solid rgba(116,155,174,.22);background:#081014}
+.equipment-instance h3{margin:2px 0 4px}.equipment-instance p{margin:0;color:#8fa1a9;font-size:11px}.equipment-id{font-size:9px;letter-spacing:.08em;color:#667f8a}
+.equipment-energy{display:grid;gap:3px}.equipment-energy>b{font-size:14px}.equipment-energy span,.equipment-energy small{font-size:10px;color:#8ca1aa}.equipment-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.charge-state{font-size:10px;color:#8bd7a5}
+.equipment-loan-box{margin-top:14px;padding:11px;border:1px solid rgba(211,155,81,.28);background:rgba(79,48,19,.12)}.equipment-loan-box h3{margin:0 0 5px}
+@media(max-width:900px){.equipment-instance{grid-template-columns:1fr}.power-source-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.power-source-grid{grid-template-columns:1fr}}
