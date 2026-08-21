@@ -14,18 +14,35 @@ function npcKnowledgeRows(){
  return Object.keys(state.npcs||{}).map(id=>({id,info:npcKnowledgeDetail(id)})).filter(x=>x.info);
 }
 
+/* Population shown on the map must use player knowledge, not hidden NPC world state. */
+function playerKnownPopulationAt(id){
+ const worldTotal=districtPopulationAt(id);
+ const hiddenNpcCount=Object.entries(state.npcs||{}).filter(([nid,n])=>n?.alive&&n.location===id&&!npcKnowledge(nid).seen).length;
+ return Math.max(0,worldTotal-hiddenNpcCount);
+}
+
+const _npcKnowledgeBaseMapFilterPass=mapFilterPass;
+mapFilterPass=function(id){
+ if((state.mapPlanner?.filter||'all')==='people')return playerKnownPopulationAt(id)>0;
+ return _npcKnowledgeBaseMapFilterPass(id);
+};
+
 /* Map: vague activity -> known name -> confirmed profession. */
 const _npcKnowledgeBaseRenderMap=renderMap;
 renderMap=function(){
  _npcKnowledgeBaseRenderMap();
+ for(const node of document.querySelectorAll('.node[data-id]')){
+  const visiblePop=playerKnownPopulationAt(node.dataset.id),copy=node.querySelector('.node-copy'),worldPop=copy?.querySelector('.world-pop');
+  if(worldPop&&visiblePop<=0)worldPop.remove();
+ }
  for(const [id,n] of Object.entries(state.npcs||{})){
   if(!n?.alive)continue;
   const k=npcKnowledge(id),node=document.querySelector(`.node[data-id="${n.location}"]`);if(!node)continue;
-  const copy=node.querySelector('.node-copy');if(!copy)continue;
-  const worldPop=copy.querySelector('.world-pop');
-  if(k.seen&&!k.roleKnown&&worldPop)worldPop.textContent='◉ 有倖存者活動';
-  if(!k.seen)continue;
+  const copy=node.querySelector('.node-copy');if(!copy||!k.seen)continue;
+  let worldPop=copy.querySelector('.world-pop');
   if(!k.roleKnown){
+   if(!worldPop){worldPop=document.createElement('small');worldPop.className='world-pop';copy.appendChild(worldPop)}
+   worldPop.textContent='◉ 有倖存者活動';
    const marker=document.createElement('small');marker.className='npc-contact-pin';
    marker.textContent=k.nameKnown?`● ${npcPublicName(id)} · 身份未確認`:'● 已確認有人活動';
    copy.appendChild(marker);
