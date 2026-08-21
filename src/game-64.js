@@ -15,20 +15,20 @@ function ensureDiagnosticRuntimeV64(){
 function diagnosticRuntimeV64(id){return ensureDiagnosticRuntimeV64().tools[id]||null}
 function diagnosticCalibrationV64(id){const r=diagnosticRuntimeV64(id);if(!r)return 0;const age=Math.max(0,state.day-(r.lastCalDay||state.day));return clamp(r.calibration-age*.65,0,100)}
 function diagnosticBatteryPctV64(id){const r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id];return r&&d?clamp(r.batteryKWh/Math.max(.001,d.capacityKWh)*100,0,100):0}
-function diagnosticAccuracyV64(id){const r=diagnosticRuntimeV64(id);if(!r)return 0;const cal=diagnosticCalibrationV64(id)/100,batt=diagnosticBatteryPctV64(id)/100,cond=(r.condition??100)/100,battFactor=batt>=.35?1:batt>=.15?.84:batt>=.05?.62:.25;return clamp(cal*battFactor*(.72+.28*cond),.12,1)}
+function diagnosticAccuracyV64(id){const r=diagnosticRuntimeV64(id);if(!r)return 0;const cal=diagnosticCalibrationV64(id)/100,batt=diagnosticBatteryPctV64(id)/100,cond=(r.condition??100)/100,battFactor=batt>=.35 ? 1 : batt>=.15 ? .84 : batt>=.05 ? .62 : .25;return clamp(cal*battFactor*(.72+.28*cond),.12,1)}
 function diagnosticAccuracyLabelV64(q){return q>=.92?'校準良好':q>=.78?'可用':q>=.58?'偏差偏大':'不可靠'}
 const _diagnosticToolAvailableV64=diagnosticToolAvailableV63;
 diagnosticToolAvailableV63=function(id,place){if(!_diagnosticToolAvailableV64(id,place))return false;const r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id];return !!(r&&d&&r.condition>=20&&r.batteryKWh>=Math.min(d.basicKWh,.004))};
 function diagnosticMeasurementQualityV64(id,depth='basic'){const r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id];if(!r||!d)return 0;const need=depth==='deep'?d.deepKWh:d.basicKWh,energy=clamp(r.batteryKWh/Math.max(.001,need),0,1);return clamp(diagnosticAccuracyV64(id)*(.72+.28*energy),0,1)}
 function consumeDiagnosticRunV64(toolIds,depth='basic'){
- for(const id of toolIds){const r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id];if(!r||!d)continue;const use=depth==='deep'?d.deepKWh:d.basicKWh;r.batteryKWh=Math.max(0,r.batteryKWh-use);r.calibration=clamp(r.calibration-(depth==='deep'?2.8:1.25),0,100);r.condition=clamp(r.condition-(depth==='deep'?.18:.08),0,100);r.uses++}
+ for(const id of toolIds){const r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id];if(!r||!d)continue;const use=depth==='deep'?d.deepKWh:d.basicKWh;r.batteryKWh=Math.max(0,r.batteryKWh-use);r.calibration=clamp(r.calibration-(depth==='deep'?2.8:1.25),0,100);r.condition=clamp(r.condition-(depth==='deep' ? .18 : .08),0,100);r.uses++}
 }
 function refreshInventoryV64(){const dlg=$('inventoryDialog');if(dlg?.open)dlg.close();openInventory()}
 function refillDiagnosticBatteryV64(id){
  const t=ensureFieldTeamV43(),r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id];if(!r||!d)return toast('尚未擁有這件量測儀表');if(t.active)return toast('外勤進行中，不能更換儀表電池');const room=Math.max(0,d.capacityKWh-r.batteryKWh);if(room<.002)return toast('儀表電池已充足');const move=Math.min(room,d.cellTopupKWh,state.resources?.battery||0);if(move<=.001)return toast('中央庫存沒有可用電池電量');state.resources.battery=Math.max(0,(state.resources.battery||0)-move);r.batteryKWh=Math.min(d.capacityKWh,r.batteryKWh+move);log(`${d.label}更換／補充儀表電池 ${move.toFixed(2)} kWh。`,'good');saveGame(false);refreshInventoryV64()
 }
 function calibrationSiteV64(){const t=ensureFieldTeamV43();if(t.active)return null;const site=fieldTeamHomeV43();return ['base','vent'].includes(site)?site:null}
-function calibrationPlanV64(id){const d=DIAGNOSTIC_RUNTIME_DEFS_V64[id],site=calibrationSiteV64();if(!d||!site)return null;const chen=chenMaintenanceAvailableV62(site),hours=Math.round(d.calHours*(chen?.65:1)*20)/20;return {site,chen,hours}}
+function calibrationPlanV64(id){const d=DIAGNOSTIC_RUNTIME_DEFS_V64[id],site=calibrationSiteV64();if(!d||!site)return null;const chen=chenMaintenanceAvailableV62(site),hours=Math.round(d.calHours*(chen ? .65 : 1)*20)/20;return {site,chen,hours}}
 function calibrateDiagnosticToolV64(id){
  const r=diagnosticRuntimeV64(id),d=DIAGNOSTIC_RUNTIME_DEFS_V64[id],p=calibrationPlanV64(id);if(!r||!d)return toast('尚未擁有這件量測儀表');if(!p)return toast('必須回到耐熱屋或中央通風站的已知參考點才能校準');if(p.chen&&npcDutyRemainingV41('chen')+1e-6<p.hours)return toast('陳技師今日剩餘工時不足');if(!spendWorldTimeV26(p.hours,{label:`校準${d.label}`}))return;const before=diagnosticCalibrationV64(id);r.calibration=100;r.lastCalDay=state.day;r.condition=Math.min(100,r.condition+.8);if(p.chen)useNpcDutyV41('chen',p.hours,`量測儀表校準：${d.label}`);log(`${d.label}完成參考點校準：${before.toFixed(0)}% → 100%。`,'good');saveGame(false);refreshInventoryV64()
 }
@@ -40,8 +40,8 @@ diagnoseAssetV63=function(id,depth='basic'){
  const fs=ensureDiagnosticEvidenceV63(id),active=activeAssetFaultsV62(id);let confirmed=0;
  for(const f of active){
   const req=FAULT_MEASUREMENTS_V63[f.id]||[],qualities=req.map(x=>toolQual[x]||0),coverage=req.length?qualities.reduce((a,b)=>a+b,0)/req.length:1,matched=qualities.filter(x=>x>0).length,old=faultEvidenceV63(id,f.id);
-  let gain=.16+(plan.deep?.14:0)+(plan.chen?.14:0)+coverage*.38;if(req.length&&!matched)gain-=.10;
-  const evidenceCap=req.length?(coverage<.10?(plan.chen?.76:.70):coverage<.55?(plan.chen?.84:.79):coverage<.80?.90:.97):.97,confidence=clamp(Math.min(evidenceCap,Math.max(old.confidence,0)+gain),0,.97),qualityPenalty=req.length?(1-coverage)*18:0,spread=Math.max(6,44-confidence*34+qualityPenalty),center=f.severity;
+  let gain=.16+(plan.deep ? .14 : 0)+(plan.chen ? .14 : 0)+coverage*.38;if(req.length&&!matched)gain-=.10;
+  const evidenceCap=req.length?(coverage<.10?(plan.chen ? .76 : .70):coverage<.55?(plan.chen ? .84 : .79):coverage<.80 ? .90 : .97):.97,confidence=clamp(Math.min(evidenceCap,Math.max(old.confidence,0)+gain),0,.97),qualityPenalty=req.length?(1-coverage)*18:0,spread=Math.max(6,44-confidence*34+qualityPenalty),center=f.severity;
   fs.evidence[f.id]={confidence,severityMin:clamp(center-spread,0,100),severityMax:clamp(center+spread,0,100),runs:(old.runs||0)+1,tools:[...new Set([...(old.tools||[]),...plan.tools])],lastDay:state.day,measurementQuality:coverage};if(confidence>=.78){if(!fs.diagnosed.includes(f.id))fs.diagnosed.push(f.id);confirmed++}
  }
  consumeDiagnosticRunV64(plan.tools,depth);fs.diagnosisRuns.push({day:state.day,site:plan.place.site,depth,tools:plan.tools,toolQuality:toolQual,withChen:plan.chen,hours:plan.hours});fs.lastDiagnosis={day:state.day,site:plan.place.site,hours:plan.hours,withChen:plan.chen,depth,tools:plan.tools,toolQuality:toolQual};if(plan.chen)useNpcDutyV41('chen',plan.hours,`${plan.deep?'深入量測':'快速檢查'}：${assetDefs.find(a=>a.id===id)?.name||id}`);log(`${assetDefs.find(a=>a.id===id)?.name||id}完成${plan.deep?'深入量測':'快速檢查'}：${confirmed} 項故障達精準維修門檻；儀表低電量或失準會降低證據品質。`,confirmed?'major':'');render();saveGame(false)
