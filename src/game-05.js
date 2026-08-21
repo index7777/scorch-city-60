@@ -1,0 +1,36 @@
+function tutorialCopy(){const st=tutorialStage();if(st===1)return {k:'STEP 1 / 3',title:'先把水帶回來',text:'夜晚只有 8 小時。從行動中心前往便利商店，回收優先選「水」，完成第一趟補給。',cta:'規劃便利商店遠征',target:'store'};if(st===2)return {k:'STEP 2 / 3',title:'取得第一個物流升級',text:'徒手只有 18kg。前往五金行搜索推車，讓單趟載重提升到 80kg。',cta:'前往五金行',target:'hardware'};if(st===3)return {k:'STEP 3 / 3',title:'理解「找到 ≠ 擁有」',text:'前往社區中心。那裡有一個 200L 大型水桶；你會發現它，但目前很可能搬不回來。記住位置，之後帶車再來。',cta:'前往社區中心',target:'school'};return {k:'導覽完成',title:'你已掌握第一個生存循環',text:'接下來自己決定：擴大物流、建立水處理、找專業 NPC，或提早準備 Day 30。',cta:'關閉導覽',target:''}}
+function renderOnboarding(){const box=$('onboardingRail');if(!box)return;if(!state.onboarding?.enabled){box.hidden=true;return}box.hidden=false;const c=tutorialCopy();$('tutorialKicker').textContent=c.k;$('tutorialTitle').textContent=c.title;$('tutorialText').textContent=c.text;$('tutorialCta').textContent=c.cta;$('tutorialCta').dataset.target=c.target||'';if(tutorialStage()===4&&!state.onboarding.completed){state.onboarding.completed=true;log('開局導覽完成。高階系統會依實際進度逐步出現。','good')}}
+function tutorialWaterGain(gain){if(state.onboarding?.enabled&&!state.onboarding.firstWater&&(gain?.water||0)>0){state.onboarding.firstWater=true;log('導覽：你已完成第一趟補水。下一步，提升搬運能力。','good')}}
+function tutorialAssetSeen(found){if(state.onboarding?.enabled&&!state.onboarding.firstAsset&&found?.length){state.onboarding.firstAsset=true;log('導覽：大型物資已被標記。發現它不代表你現在搬得走。','major')}}
+function applyProgressiveUI(){const reveal=(id,on)=>{const el=$(id);if(!el)return;el.classList.toggle('progressive-hidden',!on);el.setAttribute('aria-hidden',on?'false':'true')};if(!state.onboarding?.enabled){reveal('baseMgmtBtn',true);reveal('cityOpsBtn',true);reveal('researchBtn',true);reveal('craftBtn',true);reveal('coreProjectBtn',state.knownCore||state.day>=40);return}reveal('baseMgmtBtn',state.day>=2||state.base.population>1);reveal('cityOpsBtn',state.expedition.count>0||state.onboarding.firstAsset);reveal('craftBtn',state.gear.cart||state.day>=2);reveal('researchBtn',state.resources.data>0||state.day>=3);reveal('coreProjectBtn',state.knownCore||state.day>=40)}
+function startOnboarding(){state.onboarding.enabled=true;state.onboarding.introSeen=true;renderOnboarding();$('tutorialDialog')?.close();saveGame(false)}
+function skipOnboarding(){state.onboarding.enabled=false;state.onboarding.completed=true;$('tutorialDialog')?.close();render();toast('已跳過開局導覽')}
+function reopenOnboarding(){state.onboarding.enabled=true;state.onboarding.completed=false;if(state.onboarding.firstWater&&state.gear.cart&&state.onboarding.firstAsset){state.onboarding.firstWater=false;state.onboarding.firstAsset=false}render();toast('已重新開啟開局導覽')}
+function renderResources(){$('resources').innerHTML=Object.entries(state.resources).map(([k,v])=>{let cls='';if((k==='water'&&daysOfWater()<3)||(k==='food'&&v<dailyFoodNeed()*2))cls='bad';return `<div class="resource-row ${cls}"><span>${RES_LABELS[k]||k}</span><b>${Math.max(0,Math.floor(v))}</b></div>`}).join('')}
+function cargoCapacityKg(){return state.gear.vehicle?(state.logistics.heavyReady?1200:state.vehicle.capacityKg):state.gear.cart?80:18}
+function cargoMode(){return state.gear.vehicle?`工程車 ${state.logistics.heavyReady?1200:state.vehicle.capacityKg}kg`:state.gear.cart?'推車 80kg':'徒手 18kg'}
+function travelFuelCost(loc){return state.gear.vehicle?Math.max(1,Math.ceil(loc.risk/2)):0}
+function renderBase(){state.logistics.capacity=cargoMode();const rows=[['中央站人口',state.base.population],['平均疲勞',Math.round(state.fatigue)+'%'],['可分配人力',Math.max(1,state.base.population)],['每日耗水',dailyWaterNeed()+' L'],['配給',state.ration.water+' L/人'],['發電能力',state.base.powerKW+' kW'],['儲能上限',state.base.storageKWh+' kWh'],['冷卻負載',state.base.ventCapacity?coolingLoadPct()+'%':'—'],['設施狀況',Math.round(state.base.condition)+'%'],['物流能力',state.logistics.capacity],['大型資產',state.logistics.moved+'/'+assetDefs.length],['遠征次數',state.expedition.count],['外部冷站',state.coldStations.length],['核心工程',state.base.core?'10/10 完成':`${state.coreProject.stage}/10`],['中央站',state.base.core?'核心完成':state.base.ventilation?`階段 ${state.base.ventilation}`:'未啟動']];$('baseStats').innerHTML=rows.map(r=>`<div class="resource-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}
+function isSafeSearch(loc){if(state.day<30)return state.phase==='night';if(state.base.core)return true;if(!state.gear.coolingPack)return false;return true}
+function coolingCost(loc){let c=Math.max(1,Math.ceil(loc.risk*1.6));if(state.coldStations.includes('subway')&&['homes','hardware','industrial','subway'].includes(loc.id))c=Math.max(1,c-2);if(state.coldStations.includes('coldstore')&&['industrial','coldstore','research','solar'].includes(loc.id))c=Math.max(1,c-2);if(state.gear.vehicle)c=Math.max(1,c-1);if(state.base.condition<55)c+=1;return c}
+function timeCostFor(loc){let c=1+Math.floor(loc.risk/2);if(state.gear.vehicle)c=Math.max(1,c-1);if(loc.id==='warehouse'&&!state.gear.vehicle)c+=1;return c}
+function lootCap(){return cargoCapacityKg()}
+function intelLabel(id){const i=state.intel[id];if(!i)return '';const age=state.day-(i.verifiedDay??i.day),c=clamp(Math.round((i.confidence??75)-age*8),10,100);if(age===0)return `今日情報 · 可信 ${c}%`;if(age<=2)return `${age} 天前情報 · 可信 ${c}%`;return `${age} 天前舊情報 · 可信 ${c}%`}
+const MAP_ROUTES=[
+ ['base','homes'],['homes','store'],['homes','school'],['store','hardware'],['school','clinic'],['clinic','fire'],['hardware','warehouse'],['warehouse','fire'],['hardware','subway'],['subway','industrial'],['industrial','coldstore'],['coldstore','research'],['research','solar'],['solar','vent'],['fire','vent'],['warehouse','coldstore'],['industrial','research']
+];
+// Road truth and player knowledge are deliberately separate.
+function roadKey(a,b){return [a,b].sort().join('~')}
+function roadEnds(key){return String(key).split('~')}
+function roadName(key){const [a,b]=roadEnds(key);return `${mapLoc(a)?.name||a} ↔ ${mapLoc(b)?.name||b}`}
+function roadWorldState(a,b){return state.roadWorld?.[roadKey(a,b)]||{status:'open',changedDay:0}}
+function roadIntelState(a,b){return state.roadIntel?.[roadKey(a,b)]||null}
+function roadIntelAge(i){return Math.max(0,state.day-(i?.verifiedDay??i?.day??state.day))}
+function roadIntelConfidence(i){if(!i)return 0;return clamp(Math.round((i.confidence??75)-roadIntelAge(i)*8),10,100)}
+function roadKnownBlocked(a,b){const i=roadIntelState(a,b);return !!i&&i.status==='blocked'&&roadIntelConfidence(i)>=45}
+function roadRumorPenalty(a,b){const i=roadIntelState(a,b);if(!i)return 1;const c=roadIntelConfidence(i);if(i.status==='danger')return 1.12+(c/100)*.22;if(i.status==='blocked'&&c<45)return 1.18;if(i.status==='repaired'||i.status==='open')return .98;return 1}
+function verifyRoad(a,b,source='親自確認'){const w=roadWorldState(a,b);const status=w.status==='blocked'?'blocked':w.status==='danger'?'danger':w.status==='repaired'?'repaired':'open';state.roadIntel[roadKey(a,b)]={status,source,day:state.day,verifiedDay:state.day,confidence:100};return state.roadIntel[roadKey(a,b)]}
+function mapLoc(id){return locations.find(l=>l.id===id)}
+function edgeKm(a,b){const A=mapLoc(a),B=mapLoc(b);return A&&B?Math.hypot(A.x-B.x,A.y-B.y)*.04:99}
+function mapNeighbors(id){const out=[];for(const [a,b] of MAP_ROUTES){if(a===id)out.push(b);else if(b===id)out.push(a)}return out}
+function mapStartId(){return state.day>=30&&state.base.ventilation>0?'vent':'base'}
