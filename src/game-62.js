@@ -40,7 +40,7 @@ assetOutputFactorV60=function(id){return clamp(_assetOutputFactorV62(id)*assetFa
 
 function assetRepairSiteV62(id){const t=ensureFieldTeamV43(),cargo=t.active?ensureDynamicCargoV52():null;if(t.active&&cargo?.assets?.includes(id))return {kind:'field',site:t.current||ensureItineraryV27().current};if(state.assets?.[id]?.transported)return {kind:'station',site:'vent'};return null}
 function chenMaintenanceAvailableV62(site){const t=ensureFieldTeamV43();if(t.active)return t.npcIds.includes('chen')&&state.npcs?.chen?.alive&&npcOnDutyV41('chen','maintenance')&&npcDutyRemainingV41('chen')>.01;return state.npcs?.chen?.alive&&npcKnown(state.npcs.chen)&&npcServiceZoneV40('chen')===site&&npcOnDutyV41('chen','maintenance')&&npcDutyRemainingV41('chen')>.01}
-function diagnosisHoursV62(id,site){const a=assetDefs.find(x=>x.id===id),base=.32+Math.min(.5,(a?.weight||200)/1200*.45),chen=chenMaintenanceAvailableV62(site);return Math.round(base*(chen?.58:1)*20)/20}
+function diagnosisHoursV62(id,site){const a=assetDefs.find(x=>x.id===id),base=.32+Math.min(.5,(a?.weight||200)/1200*.45),chen=chenMaintenanceAvailableV62(site);return Math.round(base*(chen ? .58 : 1)*20)/20}
 function diagnoseAssetV62(id){
  const st=state.assets?.[id],place=assetRepairSiteV62(id);if(!st||!place)return toast('設備必須在外勤隊伍貨艙或已運回中央站才能診斷');
  const h=diagnosisHoursV62(id,place.site),withChen=chenMaintenanceAvailableV62(place.site);if(withChen&&npcDutyRemainingV41('chen')+1e-6<h)return toast('陳技師今日剩餘工時不足');if(place.kind==='field'&&!ensureFieldToolCarryV47().includes('toolkit'))return toast('現場診斷需要攜帶遠征工具箱');
@@ -48,7 +48,7 @@ function diagnoseAssetV62(id){
  const fs=assetFaultStateV62(id);fs.diagnosed=[...new Set([...fs.diagnosed,...activeAssetFaultsV62(id).map(f=>f.id)])];fs.lastDiagnosis={day:state.day,site:place.site,hours:h,withChen};if(withChen)useNpcDutyV41('chen',h,`設備診斷：${assetDefs.find(a=>a.id===id)?.name||id}`);
  log(`${assetDefs.find(a=>a.id===id)?.name||id}完成故障診斷：${fs.diagnosed.length?diagnosedAssetFaultsV62(id).map(f=>ASSET_FAULT_DEFS_V62[f.id]?.label||f.id).join('、'):'未發現明確故障模式'}。`,'major');render();saveGame(false)
 }
-function faultRepairPlanV62(assetId,faultId,kind){const fault=assetFaultStateV62(assetId)?.faults?.[faultId],d=ASSET_FAULT_DEFS_V62[faultId];if(!fault?.active||!d)return null;const withChen=chenMaintenanceAvailableV62(kind==='field'?(ensureFieldTeamV43().current||ensureItineraryV27().current):'vent'),hours=Math.round(d.baseHours*(.7+.55*fault.severity/100)*(withChen?.62:1)*20)/20;return {fault,d,withChen,hours,spares:{...d.spares},parts:Math.max(1,Math.ceil(d.stationParts*fault.severity/55))}}
+function faultRepairPlanV62(assetId,faultId,kind){const fault=assetFaultStateV62(assetId)?.faults?.[faultId],d=ASSET_FAULT_DEFS_V62[faultId];if(!fault?.active||!d)return null;const withChen=chenMaintenanceAvailableV62(kind==='field'?(ensureFieldTeamV43().current||ensureItineraryV27().current):'vent'),hours=Math.round(d.baseHours*(.7+.55*fault.severity/100)*(withChen ? .62 : 1)*20)/20;return {fault,d,withChen,hours,spares:{...d.spares},parts:Math.max(1,Math.ceil(d.stationParts*fault.severity/55))}}
 function faultSpareOkV62(plan){const load=fieldSpareLoadV50();return Object.entries(plan.spares||{}).every(([k,n])=>(load[k]||0)>=n)}
 function faultSpareTextV62(plan){return Object.entries(plan?.spares||{}).map(([k,n])=>`${FIELD_SPARE_DEFS_V50[k]?.label||k} ×${n}`).join('、')}
 function repairAssetFaultV62(assetId,faultId,kind='station'){
