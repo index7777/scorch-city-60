@@ -1,0 +1,6 @@
+/* v14.2.2 QA — field tool runtime / durability / energy budget */
+.tool-runtime-box{margin:12px 0;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:10px;background:rgba(7,13,17,.56)}
+.tool-runtime-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 10px}
+.tool-runtime-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.025);min-width:0}
+.tool-runtime-row>div{display:flex;flex-direction:column;gap:2px;min-width:0}.tool-runtime-row b,.tool-runtime-row small,.tool-runtime-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tool-runtime-row small{opacity:.65}.tool-runtime-row>span{font-size:12px;text-align:right}
+@media (max-width:760px){.tool-runtime-list{grid-template-columns:1fr}.tool-runtime-row{align-items:flex-start;flex-direction:column}.tool-runtime-row>span{text-align:left;white-space:normal}}
