@@ -1,0 +1,62 @@
+name: QA Browser Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Browser smoke syntax check
+        run: node --check qa/browser-smoke.mjs
+
+      - name: Run rendered Chromium smoke tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/scorch-http.log 2>&1 &
+          HTTP_PID=$!
+          CHROME="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then
+            echo "No Chrome/Chromium binary found on runner"
+            exit 1
+          fi
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --remote-debugging-port=9222 \
+            --user-data-dir=/tmp/scorch-chrome \
+            http://127.0.0.1:4173/ >/tmp/scorch-chrome.log 2>&1 &
+          CHROME_PID=$!
+          cleanup(){ kill "$CHROME_PID" "$HTTP_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
+
+          for i in $(seq 1 80); do
+            if curl -fsS http://127.0.0.1:9222/json/version >/dev/null && curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              break
+            fi
+            sleep .25
+          done
+
+          if ! curl -fsS http://127.0.0.1:9222/json/version >/dev/null; then
+            echo "Chromium CDP did not start"
+            cat /tmp/scorch-chrome.log || true
+            exit 1
+          fi
+
+          node qa/browser-smoke.mjs
