@@ -76,6 +76,31 @@ await test('X26 quick search leaves hidden loot for a later full itinerary searc
  assert(ok,'quick search consumed hidden loot or full search could not recover it later');
 });
 
+await test('X27 direct NPC trade session consumes 0.5h',async()=>{
+ const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();state.day=5;state.phase='night';state.hoursLeft=8;const id=Object.keys(state.npcs)[0],k=npcKnowledge(id);k.seen=k.nameKnown=k.roleKnown=k.tradeUnlocked=true;const before=state.hoursLeft;openTrade(id);const after=state.hoursLeft;document.getElementById('tradeDialog')?.close();return Math.abs((before-after)-.5)<.01})()`);
+ assert(ok,'NPC trade session did not consume 0.5h');
+});
+
+await test('X28 relationship UI shows 0-100 score and actual unlock thresholds',async()=>{
+ const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();state.day=5;state.phase='night';state.hoursLeft=8;const id=Object.keys(state.npcs)[0],k=npcKnowledge(id);k.seen=k.nameKnown=k.roleKnown=k.tradeUnlocked=true;openTrade(id);const t=document.getElementById('tradeContent')?.textContent||'';const good=/好感度 \d+\/100/.test(t)&&/55\/100/.test(t)&&/65\/100/.test(t)&&/85\/100/.test(t);document.getElementById('tradeDialog')?.close();return good})()`);
+ assert(ok,'relationship unlock thresholds were not visible');
+});
+
+await test('X29 high-risk injury and time-overrun mutate real state',async()=>{
+ const ok=await evaluate(`(()=>{const loc={id:'qa-risk',name:'QA 高風險地點',risk:4};state.flags.highRiskEventsV79={};state.flags.highRiskInjuriesV84={};state.phase='night';state.hoursLeft=8;state.fieldTeam.active=false;let injuryDay=null,overrunDay=null;const sum=loc.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);for(let d=1;d<=8;d++){const code=(d+sum)%4;if(code===1&&!injuryDay)injuryDay=d;if(code===2&&!overrunDay)overrunDay=d}state.day=injuryDay;applyHighRiskConsequenceV79(loc);const injured=!!ensureHighRiskInjuriesV84().player;state.flags.highRiskEventsV79={};state.day=overrunDay;state.hoursLeft=8;const before=state.hoursLeft;applyHighRiskConsequenceV79(loc);const overrun=Math.abs((before-state.hoursLeft)-.5)<.01;return injured&&overrun})()`);
+ assert(ok,'high-risk injury/overrun did not affect state');
+});
+
+await test('X30 contacted settlement exposes enabled trade entry',async()=>{
+ const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();const id=Object.keys(state.settlements||{})[0];if(!id)return false;const s=state.settlements[id];state.locations[s.location].searched=true;openSettlements();const b=document.querySelector('[data-settlement-trade-v79="'+id+'"]');const good=!!b&&!b.disabled&&/發起交易/.test(b.textContent);document.getElementById('settlementDialog')?.close();return good})()`);
+ assert(ok,'contacted settlement did not expose trade entry');
+});
+
+await test('X31/X32 visible naming is normalized',async()=>{
+ const ok=await evaluate(`(()=>{render();const research=document.getElementById('researchBtn')?.textContent||'',title=document.getElementById('researchDialog')?.querySelector('h2')?.textContent||'';const host=document.createElement('div');host.textContent='大型設備';normalizeVisibleCopyV81(host);return /研究/.test(research)&&title==='研究'&&host.textContent==='大型資產'})()`);
+ assert(ok,'research/large-asset naming was not normalized');
+});
+
 await sleep(150);
 assert(exceptions.length===0,`browser runtime exceptions: ${exceptions.join(' | ')}`);
 console.log('PASS browser runtime exception check');
