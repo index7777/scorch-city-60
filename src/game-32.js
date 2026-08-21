@@ -31,7 +31,7 @@ function moveVehicleV32(id){if(!state.gear?.vehicle)return;ensureVehicleStateV32
 function vehicleCabinCapacityV32(){return coolingVehicleV32()?3:0}
 function vehicleCabinCanCoverV32(users,hours){
  const e=coolingVehicleV32();if(!e||users>vehicleCabinCapacityV32())return false;const m=equipmentModeV24(e);if(!m)return false;
- const aux=Math.max(0,users?0.06:0),need=m.powerKW*Math.max(0,hours)+aux;return e.battery.chargeKWh+1e-6>=need;
+ const need=m.powerKW*Math.max(0,hours)+0.06;return e.battery.chargeKWh+1e-6>=need;
 }
 function vehicleDriveCostV32(distance,hours,{users=1,cooling=false}={}){
  distance=Math.max(0,+distance||0);hours=Math.max(0,+hours||0);const e=coolingVehicleV32(),m=e?equipmentModeV24(e):null;
@@ -64,7 +64,6 @@ craftPrereqReasonsV23=function(c){const r=_craftPrereqV32(c);if(c.id==='coolVehi
 const _craftWorkV32=craftWorkV26;
 craftWorkV26=function(id){if(id==='coolVehicle'){const v=ensureVehicleStateV32();return {hours:4,site:v.currentLocation||'fire',environment:'outdoor',activity:'repair'}}return _craftWorkV32(id)};
 
-/* Correct route estimates after an escort rescue: player and vehicle continue from the rescue destination. */
 itineraryEstimateV27=function(){
  const it=ensureItineraryV27(),speed=itinerarySpeedV27(),home=mapStartId();let from=home,travel=0,actions=0,legs=[],rescueIssues=[];
  for(const stop of it.stops){
@@ -79,13 +78,12 @@ itineraryEstimateV27=function(){
  const total=Math.round((travel+actions)*100)/100,left=currentPeriodHoursLeftV26();return {ok:!rescueIssues.length,total,travel:Math.round(travel*100)/100,actions:Math.round(actions*100)/100,left,buffer:Math.round((left-total)*100)/100,legs,mode:itineraryModeV27(),rescueIssues,reason:rescueIssues[0]?.f?.reason||''};
 };
 function itineraryVehicleForecastV32(){
- const e=itineraryEstimateV27();if(!e.ok||!state.gear?.vehicle)return null;let distance=0,hours=0,coolingHours=0;for(const leg of e.legs){distance+=leg.route?.distance||0;hours+=leg.travel||0;if(currentOutsideTempV26()>35)coolingHours+=leg.travel||0}
- const cv=coolingVehicleV32(),cooling=!!cv,cost=vehicleDriveCostV32(distance,hours,{users:1,cooling});return {distance,hours,coolingHours,cost,vehicle:cv,okFuel:(state.resources.fuel||0)+1e-6>=cost.fuelL,okBattery:!cv||cv.battery.chargeKWh+1e-6>=cost.totalKWh};
+ const e=itineraryEstimateV27();if(!e.ok||!state.gear?.vehicle)return null;let distance=0,hours=0;for(const leg of e.legs){distance+=leg.route?.distance||0;hours+=leg.travel||0}
+ const cv=coolingVehicleV32(),cooling=!!(cv&&currentOutsideTempV26()>35),cost=vehicleDriveCostV32(distance,hours,{users:1,cooling});return {distance,hours,cost,vehicle:cv,okFuel:(state.resources.fuel||0)+1e-6>=cost.fuelL,okBattery:!cv||cv.battery.chargeKWh+1e-6>=cost.totalKWh};
 }
 const _plannerHtmlV32=itineraryPlannerHtmlV27;
 itineraryPlannerHtmlV27=function(){let html=_plannerHtmlV32();const f=itineraryVehicleForecastV32();if(!f)return html;const cv=f.vehicle,box=`<section class="vehicle-route-check ${f.okFuel&&f.okBattery?'ok':'bad'}"><h3>工程車供需</h3><div class="vehicle-route-grid"><span>路段 <b>${f.distance.toFixed(1)} km</b></span><span>柴油 <b>${f.cost.fuelL.toFixed(1)} L</b></span><span>車載用電 <b>${cv?f.cost.totalKWh.toFixed(2)+' kWh':'未改裝'}</b></span><span>乘員冷卻 <b>${cv?'最多 3 人':'無'}</b></span></div>${!f.okFuel?'<p class="action-warning">工程車燃料不足，不能完成目前排定路線。</p>':''}${!f.okBattery?'<p class="action-warning">車載製冷電池不足，需充電或改用個人冷卻設備。</p>':''}</section>`;return html.replace('<div class="planner-actions">',box+'<div class="planner-actions">')};
 
-/* Vehicle is a real moving asset. Travel consumes diesel; hot travel can use the cabin instead of draining a backpack. */
 runItineraryStepV27=function(){
  const it=ensureItineraryV27(),home=mapStartId();if(it.status!=='running')return;
  if(it.index>=it.stops.length){
@@ -96,17 +94,21 @@ runItineraryStepV27=function(){
  const stop=it.stops[it.index],loc=mapLoc(stop.location),r=routeBetweenV27(it.current,stop.location,it.routeMode);if(!r)return pauseItineraryV27(`無法前往 ${loc?.name||stop.location}`);const bad=itineraryUnknownBlockV27(r);if(bad){verifyRoad(bad[0],bad[1],'行程途中親眼確認');return pauseItineraryV27(`${roadName(roadKey(bad[0],bad[1]))}與舊情報不符，實際已封閉。路線已停止，請重算。`)}
  const travel=r.distance/itinerarySpeedV27(),vf=vehicleDriveFeasibilityV32(r.distance,travel,{users:1});if(!vf.ok)return pauseItineraryV27(vf.reason);const travelPack=currentOutsideTempV26()>35&&!vf.useCabinCooling?bestPlayerCoolingV24():null;
  if(!spendWorldTimeV26(travel,{label:`前往${loc.name}`,coolingPack:travelPack}))return pauseItineraryV27('移動時間或熱防護不足');const drive=consumeVehicleDriveV32(r.distance,travel,{users:1,useCabinCooling:vf.useCabinCooling});if(!drive.ok)return pauseItineraryV27(drive.reason);moveVehicleV32(stop.location);it.current=stop.location;
- const action=stop.action==='rescue'?.75:stopActionHoursV27(stop),actionPack=currentOutsideTempV26()>35?bestPlayerCoolingV24():null;if(!spendWorldTimeV26(action,{label:`${loc.name}：${itineraryActionsV27(loc.id).find(x=>x[0]===stop.action)?.[1]||'地點行動'}`,coolingPack:actionPack}))return pauseItineraryV27('地點行動時間或熱防護不足');it.index++;
+ const action=stop.action==='rescue' ? .75 : stopActionHoursV27(stop),actionPack=currentOutsideTempV26()>35?bestPlayerCoolingV24():null;if(!spendWorldTimeV26(action,{label:`${loc.name}：${itineraryActionsV27(loc.id).find(x=>x[0]===stop.action)?.[1]||'地點行動'}`,coolingPack:actionPack}))return pauseItineraryV27('地點行動時間或熱防護不足');it.index++;
  if(stop.action==='search')collectStopLootV27(loc);else if(stop.action==='scout'){state.intel[loc.id]={day:state.day,verifiedDay:state.day,summary:summarizeRemaining(state.locations[loc.id].remaining),source:'行程偵察',confidence:100};log(`你重新確認了${loc.name}的現況。`)}else if(stop.action==='asset'){discoverAssetsAt(loc.id);log(`你在${loc.name}完成大型設備盤點；實際搬運仍受載重與所有權限制。`)}else if(stop.action==='rescue'){if(!executeNpcRescueV29(stop))return;moveVehicleV32(it.current)}
  const encounterLoc=it.current,pair=npcEncounterAt(encounterLoc);if(pair){const [nid]=pair;if(!npcKnowledge(nid).tradeUnlocked){pauseItineraryV27(`${locationLabelV24(encounterLoc)}出現未完成的倖存者接觸事件`);setTimeout(()=>openNpcEncounter(nid),0);return}if(stop.action==='npc'){pauseItineraryV27(`正在與${npcPublicName(nid)}互動；完成後可繼續剩餘行程`);setTimeout(()=>openTrade(nid),0);return}}
  render();renderMap();saveGame(false);setTimeout(runItineraryStepV27,0)
 };
 
-/* Escort rescue uses the same moving vehicle ledger; the v30 handler still owns time and cooling assignment drain. */
 const _executeNpcRescueV32=executeNpcRescueV29;
 executeNpcRescueV29=function(stop){
  const f=rescueFeasibilityV29(stop);if(!f.ok)return _executeNpcRescueV32(stop);
- if(f.mode==='escort'&&state.gear?.vehicle&&f.leg){const vf=vehicleDriveFeasibilityV32(f.leg.route.distance,f.leg.hours,{users:2});if(!vf.ok){pauseItineraryV27(vf.reason);return false}const motion=vehicleDriveCostV32(f.leg.route.distance,f.leg.hours,{users:2,cooling:false});if((state.resources.fuel||0)+1e-6<motion.fuelL){pauseItineraryV27('工程車燃料不足以完成雙人撤離');return false}state.resources.fuel=Math.max(0,state.resources.fuel-motion.fuelL);const cv=coolingVehicleV32();if(cv){const aux=Math.min(cv.battery.chargeKWh,motion.auxKWh);cv.battery.chargeKWh=Math.max(0,cv.battery.chargeKWh-aux)}const ok=_executeNpcRescueV32(stop);if(ok)moveVehicleV32(ensureItineraryV27().current);return ok}
+ if(f.mode==='escort'&&state.gear?.vehicle&&f.leg){
+  const vf=vehicleDriveFeasibilityV32(f.leg.route.distance,f.leg.hours,{users:2});if(!vf.ok){pauseItineraryV27(vf.reason);return false}
+  const motion=vehicleDriveCostV32(f.leg.route.distance,f.leg.hours,{users:2,cooling:false});if((state.resources.fuel||0)+1e-6<motion.fuelL){pauseItineraryV27('工程車燃料不足以完成雙人撤離');return false}
+  state.resources.fuel=Math.max(0,state.resources.fuel-motion.fuelL);const cv=coolingVehicleV32();if(cv){if(cv.battery.chargeKWh+1e-6<motion.auxKWh){pauseItineraryV27('製冷車輔助電力不足以完成撤離');return false}cv.battery.chargeKWh=Math.max(0,cv.battery.chargeKWh-motion.auxKWh)}
+  const ok=_executeNpcRescueV32(stop);if(ok)moveVehicleV32(ensureItineraryV27().current);return ok
+ }
  return _executeNpcRescueV32(stop)
 };
 
