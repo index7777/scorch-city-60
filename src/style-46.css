@@ -1,0 +1,11 @@
+/* v14.2.2 QA — X9–X15 clarity surfaces */
+.stat[data-tooltip-v77]{position:relative;cursor:help}
+.stat[data-tooltip-v77]:hover::after,.stat[data-tooltip-v77]:focus-visible::after{content:attr(data-tooltip-v77);position:absolute;z-index:80;left:50%;top:calc(100% + 8px);transform:translateX(-50%);width:min(300px,70vw);padding:9px 10px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(15,18,20,.97);box-shadow:0 12px 28px rgba(0,0,0,.32);font-size:12px;line-height:1.45;font-weight:400;text-align:left;color:var(--text,#eee);white-space:normal;pointer-events:none}
+.grid-dispatch-card.focus-v77{outline:2px solid rgba(255,164,73,.78);outline-offset:4px}
+.asset-rule-v77{max-width:680px}
+.asset-rule-v77>p{line-height:1.6}
+.asset-rule-steps-v77{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+.asset-rule-steps-v77>div{display:grid;gap:5px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(255,255,255,.035)}
+.asset-rule-steps-v77 span{font-size:12px;line-height:1.45;color:var(--muted,#aaa)}
+#powerMgmtBtnV77 small{white-space:normal}
+@media(max-width:900px){.asset-rule-steps-v77{grid-template-columns:1fr}.stat[data-tooltip-v77]:hover::after,.stat[data-tooltip-v77]:focus-visible::after{left:0;transform:none;width:min(280px,82vw)}}
