@@ -32,6 +32,12 @@ function renderMainlineHudV67(){
  if($('mainlineRiskV67'))$('mainlineRiskV67').textContent=mainlineRiskTextV67();
  const rail=$('mainlineHudV67');if(rail)rail.classList.toggle('endless',state.day>=30)
 }
+function refreshTutorialIntroV67(){
+ const body=$('tutorialDialog')?.querySelector('.tutorial-dialog');if(!body)return;
+ const h=body.querySelector('h2');if(h)h.textContent='今晚只是第一關：你有 60 天修復城市';
+ const intro=[...body.children].find(el=>el.tagName==='P');if(intro)intro.textContent='先學會補水與搬運；接著你必須面對 Day 30 的 100°C 永晝，建立中央安全區，並在 Day 60 前完成冷源核心 10 階段工程。';
+ const seq=body.querySelector('.tutorial-sequence');if(seq)seq.innerHTML='<div><b>1</b><span>補水：理解有限夜晚與公共庫存</span></div><div><b>2</b><span>載重：徒手 18kg，推車／車輛改變物流能力</span></div><div><b>3</b><span>大型資產：發現不等於擁有，也不等於已搬回</span></div><div><b>4</b><span>主線：每日簡報 → Day 30 永晝 → 冷源核心 10 階段 → Day 60</span></div>';
+}
 
 /* Tutorial phase 2: logistics basics first, then explicitly reveal the 60-day mainline. */
 tutorialStage=function(){
@@ -76,6 +82,7 @@ function visitOrientationPanelV67(kind){
  if(target)target.addEventListener('close',()=>{if(!state.onboarding.mainlineReviewedV67)setTimeout(openOrientationV67,0)},{once:true});saveGame(false)
 }
 if($('tutorialCta'))$('tutorialCta').onclick=()=>{const st=tutorialStage(),t=$('tutorialCta').dataset.target;if(st===4||t==='__mainline__')return openOrientationV67();if(!t){state.onboarding.enabled=false;state.onboarding.completed=true;render();saveGame(false);return}openActionCenter(t)};
+if($('tutorialSkip'))$('tutorialSkip').onclick=()=>{state.onboarding.enabled=false;state.onboarding.completed=true;$('tutorialDialog')?.close();render();saveGame(false);toast('已跳過開局導覽；主線 HUD 仍會保留');queueDailyBriefV67(state.day)};
 
 /* Opening the briefing manually counts as today's briefing. */
 const _openBriefV67=openBrief;
@@ -94,4 +101,4 @@ document.addEventListener('close',()=>{const f=ensureMainlineVisibilityV67();if(
 
 const _renderV67=render;
 render=function(){const out=_renderV67();renderMainlineHudV67();return out};
-ensureMainlineVisibilityV67();installMainlineHudV67();renderMainlineHudV67();
+ensureMainlineVisibilityV67();refreshTutorialIntroV67();installMainlineHudV67();renderMainlineHudV67();
