@@ -1,0 +1,8 @@
+/* v14.2.2 QA — subtask tool/equipment contention */
+.parallel-task{grid-template-columns:minmax(140px,1.4fr) minmax(120px,.8fr) minmax(120px,.8fr) auto}
+.parallel-task.tool-missing{border-color:rgba(255,130,110,.46);background:rgba(110,34,28,.14)}
+.parallel-task.tool-missing>span{font-weight:700}
+.parallel-stop.blocked{border-color:rgba(255,130,110,.34)}
+.parallel-task select{min-width:0;width:100%}
+@media (max-width:980px){.parallel-task{grid-template-columns:minmax(0,1fr) minmax(110px,.8fr);align-items:start}.parallel-task>div{grid-column:1/-1}.parallel-task>span{justify-self:end}}
+@media (max-width:760px){.parallel-task{grid-template-columns:1fr}.parallel-task>div,.parallel-task>span{grid-column:auto}.parallel-task>span{justify-self:start}}
