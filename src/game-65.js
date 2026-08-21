@@ -24,7 +24,7 @@ function repairStrategyResourcesV65(assetId,faultId,mode,kind){
 function repairStrategyPlanV65(assetId,faultId,mode,kind){
  ensureRepairDecisionStateV65();const fault=assetFaultStateV62(assetId)?.faults?.[faultId],d=ASSET_FAULT_DEFS_V62[faultId],s=REPAIR_STRATEGIES_V65[mode],place=assetRepairSiteV62(assetId);if(!fault?.active||!d||!s||!place||place.kind!==kind)return null;
  if(kind==='field'&&(!s.field||!d.field))return null;if(kind==='station'&&!s.station)return null;
- const ev=faultEvidenceV63(assetId,faultId),withChen=chenMaintenanceAvailableV62(place.site),severityFactor=.72+.58*clamp(fault.severity/100,0,1),hours=Math.round(d.baseHours*severityFactor*s.timeFactor*(withChen ? .62 : 1)*20)/20,res=repairStrategyResourcesV65(assetId,faultId,mode,kind),toolkitKWh=kind==='field'?.18*hours:0,toolkitWear=kind==='field'?1.4*hours:0;
+ const ev=faultEvidenceV63(assetId,faultId),withChen=chenMaintenanceAvailableV62(place.site),severityFactor=.72+.58*clamp(fault.severity/100,0,1),hours=Math.round(d.baseHours*severityFactor*s.timeFactor*(withChen ? .62 : 1)*20)/20,res=repairStrategyResourcesV65(assetId,faultId,mode,kind),toolkitKWh=kind==='field' ? .18*hours : 0,toolkitWear=kind==='field' ? 1.4*hours : 0;
  return {assetId,faultId,mode,kind,fault,d,s,place,ev,withChen,hours,spares:res?.spares||{},resources:res?.resources||{},toolkitKWh,toolkitWear}
 }
 function repairResourceTextV65(plan){const rows=[];for(const [k,n] of Object.entries(plan?.spares||{}))rows.push(`${FIELD_SPARE_DEFS_V50[k]?.label||k} ×${n}`);for(const [k,n] of Object.entries(plan?.resources||{}))rows.push(`${RES_LABELS[k]||k} ${n}`);if(plan?.toolkitKWh)rows.push(`工具電 ${plan.toolkitKWh.toFixed(2)} kWh`);return rows.join('、')||'無額外耗材'}
