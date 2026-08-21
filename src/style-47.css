@@ -1,0 +1,15 @@
+/* v14.2.2 QA — X16–X22 direct decision paths */
+.brief-jump-v78{margin-top:.45rem;justify-self:start}
+.research-source-v78{margin:.45rem 0;padding:.5rem .6rem;border-left:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.035);font-size:.82rem;line-height:1.45}
+.craft-filters-v78{display:flex;flex-wrap:wrap;gap:.4rem;margin:.65rem 0 .85rem}
+.craft-category-v78{display:inline-flex;width:max-content;padding:.18rem .44rem;border:1px solid rgba(255,255,255,.16);border-radius:999px;font-size:.72rem;letter-spacing:.05em;opacity:.82}
+.craft-prereq-v78{display:grid;gap:.18rem;margin:.5rem 0;padding:.52rem .6rem;background:rgba(0,0,0,.14);border-radius:.45rem}
+.craft-prereq-v78 b{font-size:.74rem;letter-spacing:.04em;text-transform:uppercase}
+.craft-prereq-v78 span{font-size:.8rem;line-height:1.4}
+.relation-preview-v78{display:inline-block;margin-left:.3rem;font-size:.72rem;opacity:.74}
+#robNpc .relation-preview-v78{opacity:.9}
+#incidentChoices [data-npc-choice]{display:grid;gap:.18rem;text-align:left}
+.npc-choice-hint-v78{font-size:.72rem;font-weight:400;line-height:1.3;opacity:.72}
+.daylight-hint-v78{display:grid;grid-template-columns:max-content 1fr;gap:.45rem .8rem;align-items:start;margin:.55rem 0;padding:.65rem .8rem;border:1px solid rgba(255,190,110,.28);border-radius:.55rem;background:rgba(105,57,12,.18)}
+.daylight-hint-v78 b{font-size:.8rem;letter-spacing:.04em}.daylight-hint-v78 span{font-size:.8rem;line-height:1.45;opacity:.86}
+@media(max-width:900px){.daylight-hint-v78{grid-template-columns:1fr}.craft-filters-v78{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}}
