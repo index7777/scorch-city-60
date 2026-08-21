@@ -24,7 +24,7 @@ function repairStrategyResourcesV65(assetId,faultId,mode,kind){
 function repairStrategyPlanV65(assetId,faultId,mode,kind){
  ensureRepairDecisionStateV65();const fault=assetFaultStateV62(assetId)?.faults?.[faultId],d=ASSET_FAULT_DEFS_V62[faultId],s=REPAIR_STRATEGIES_V65[mode],place=assetRepairSiteV62(assetId);if(!fault?.active||!d||!s||!place||place.kind!==kind)return null;
  if(kind==='field'&&(!s.field||!d.field))return null;if(kind==='station'&&!s.station)return null;
- const ev=faultEvidenceV63(assetId,faultId),withChen=chenMaintenanceAvailableV62(place.site),severityFactor=.72+.58*clamp(fault.severity/100,0,1),hours=Math.round(d.baseHours*severityFactor*s.timeFactor*(withChen?.62:1)*20)/20,res=repairStrategyResourcesV65(assetId,faultId,mode,kind);
+ const ev=faultEvidenceV63(assetId,faultId),withChen=chenMaintenanceAvailableV62(place.site),severityFactor=.72+.58*clamp(fault.severity/100,0,1),hours=Math.round(d.baseHours*severityFactor*s.timeFactor*(withChen ? .62 : 1)*20)/20,res=repairStrategyResourcesV65(assetId,faultId,mode,kind);
  return {assetId,faultId,mode,kind,fault,d,s,place,ev,withChen,hours,spares:res?.spares||{},resources:res?.resources||{}}
 }
 function repairResourceTextV65(plan){const rows=[];for(const [k,n] of Object.entries(plan?.spares||{}))rows.push(`${FIELD_SPARE_DEFS_V50[k]?.label||k} ×${n}`);for(const [k,n] of Object.entries(plan?.resources||{}))rows.push(`${RES_LABELS[k]||k} ${n}`);return rows.join('、')||'無額外耗材'}
@@ -60,7 +60,7 @@ repairAssetFaultV62=function(assetId,faultId,kind='station'){return executeRepai
 function assetOperatingLoadV65(id){
  if(id==='generator')return (state.powerOps?.lastDispatch?.generatorKW||0)>0?1:0;
  if(id==='inverter')return state.gear?.solar&&hasReachedVentV23()?0.55:0;
- if(['compressorA','compressorB','pump','chiller'].includes(id))return (state.base?.ventilation||0)>=2?.82:0;
+ if(['compressorA','compressorB','pump','chiller'].includes(id))return (state.base?.ventilation||0)>=2 ? .82 : 0;
  if(id==='lift'&&state.coreProject?.active&&['detach','lift','haul'].includes(coreStage()?.id||''))return .75;
  return 0
 }
