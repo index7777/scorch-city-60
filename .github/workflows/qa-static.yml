@@ -30,6 +30,24 @@ jobs:
             node --check "$file"
           done
 
+      - name: Loader-equivalent concatenated syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+
+          const loader = fs.readFileSync('game.js', 'utf8');
+          const match = loader.match(/Array\.from\(\{length:(\d+)\}/);
+          if (!match) throw new Error('Cannot find game module loader length in game.js');
+          const count = Number(match[1]);
+          const files = Array.from({length: count}, (_, i) => `src/game-${String(i).padStart(2, '0')}.js`);
+          const combined = files.map(file => fs.readFileSync(file, 'utf8')).join('\n');
+          fs.writeFileSync('/tmp/scorch-city-combined.js', combined);
+          console.log(`Built loader-equivalent source from ${files.length} modules`);
+          NODE
+          node --check /tmp/scorch-city-combined.js
+
       - name: Loader and stylesheet consistency
         shell: bash
         run: |
