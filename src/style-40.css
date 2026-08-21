@@ -1,0 +1,8 @@
+/* v14.2.2 QA — early pacing / revisit feedback */
+.search-pacing-v69,.search-plan-v69{display:grid;gap:.28rem;margin:.7rem 0;padding:.72rem .82rem;border:1px solid rgba(255,255,255,.12);border-radius:.55rem;background:rgba(0,0,0,.18)}
+.search-pacing-v69 b,.search-plan-v69 b{font-size:.82rem;letter-spacing:.05em;text-transform:uppercase}
+.search-pacing-v69 span,.search-plan-v69 span{font-size:.88rem;line-height:1.4}
+.search-pacing-v69 small,.search-plan-v69 small{opacity:.72;line-height:1.35}
+.search-pacing-v69.locked,.search-plan-v69.blocked{border-color:rgba(255,130,90,.42);background:rgba(95,28,18,.22)}
+button:disabled{cursor:not-allowed;filter:saturate(.35);opacity:.48}
+@media(max-width:900px){.search-pacing-v69,.search-plan-v69{padding:.62rem .68rem}.search-pacing-v69 span,.search-plan-v69 span{font-size:.82rem}}
