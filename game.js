@@ -10,7 +10,7 @@
  const togglePanel=id=>{for(const panel of entry.querySelectorAll('.demo-entry__panel'))panel.classList.toggle('active',panel.id===id&&!panel.classList.contains('active'))};
  $e('demoHowTo').onclick=()=>togglePanel('demoHowToPanel');
  $e('demoSettings').onclick=()=>togglePanel('demoSettingsPanel');
- const files=Array.from({length:46},(_,i)=>`src/game-${String(i).padStart(2,'0')}.js`);
+ const files=Array.from({length:47},(_,i)=>`src/game-${String(i).padStart(2,'0')}.js`);
  Promise.all(files.map(src=>fetch(src).then(r=>{if(!r.ok)throw new Error(`Failed to load ${src}: ${r.status}`);return r.text()}))).then(parts=>{
   (0,eval)(parts.join('\n'));
   const tutorial=document.getElementById('tutorialDialog');
