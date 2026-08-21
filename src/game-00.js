@@ -45,12 +45,20 @@ const PORTRAIT_ART={
 };
 
 const DISTRICT_ART={
- base:'assets/backgrounds/central_vent_night.webp',
- homes:'assets/districts/homes.webp', store:'assets/districts/commercial.webp', school:'assets/districts/park.webp',
- clinic:'assets/districts/clinic.webp', hardware:'assets/districts/commercial.webp', warehouse:'assets/districts/warehouse.webp',
- fire:'assets/districts/waterworks.webp', subway:'assets/districts/highway.webp', industrial:'assets/districts/industrial.webp',
- coldstore:'assets/districts/warehouse.webp', research:'assets/districts/research.webp', solar:'assets/districts/power.webp',
- vent:'assets/backgrounds/central_vent_master.webp'
+ base:'assets/districts/thumbnails/base.webp',
+ homes:'assets/districts/thumbnails/homes.webp',
+ store:'assets/districts/thumbnails/store.webp',
+ school:'assets/districts/thumbnails/school.webp',
+ clinic:'assets/districts/thumbnails/clinic.webp',
+ hardware:'assets/districts/thumbnails/hardware.webp',
+ warehouse:'assets/districts/thumbnails/warehouse.webp',
+ fire:'assets/districts/thumbnails/fire.webp',
+ subway:'assets/districts/thumbnails/subway.webp',
+ industrial:'assets/districts/thumbnails/industrial.webp',
+ coldstore:'assets/districts/thumbnails/coldstore.webp',
+ research:'assets/districts/thumbnails/research.webp',
+ solar:'assets/districts/thumbnails/solar.webp',
+ vent:'assets/districts/thumbnails/vent.webp'
 };
 // v13.4: remaining districts also receive 2560×1440 master scenes; map thumbnails stay lightweight while location/expedition panels lazy-load 2K art.
 const DISTRICT_MASTER={
