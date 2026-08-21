@@ -45,12 +45,13 @@ function applyStorageFlowV35(plan,s,hours){
  /* Dispatch order: base/solar -> storage -> generator. */
  const afterNonGen=Math.max(0,load-nonGen),storageNeedKW=Math.min(Math.max(0,c.storageKW||0),afterNonGen),storageOutKWh=Math.min(gridStorageUsableKWhV35(),storageNeedKW*hours/lim.effDischarge);
  if(storageOutKWh>0){st.chargeKWh=Math.max(0,st.chargeKWh-storageOutKWh);st.throughputKWh+=storageOutKWh}
- const afterStorage=Math.max(0,afterNonGen-storageNeedKW),genKW=Math.min(genMax,afterStorage);
- /* Surplus renewable/base power charges storage. Scheduled generator may also charge storage only after all live loads. */
- const suppliedForLoad=nonGen+storageNeedKW+genKW,surplusKW=Math.max(0,(nonGen+genMax)-suppliedForLoad),chargeInputKW=Math.min(storageChargePotentialV35(hours),surplusKW),storedKWh=Math.min(gridStorageCapacityV35()-st.chargeKWh,chargeInputKW*hours*lim.effCharge);
+ const afterStorage=Math.max(0,afterNonGen-storageNeedKW),genLoadKW=Math.min(genMax,afterStorage);
+ /* Surplus renewable/base power charges storage. Scheduled/auto generator may also charge only after live loads. */
+ const suppliedForLoad=nonGen+storageNeedKW+genLoadKW,surplusKW=Math.max(0,(nonGen+genMax)-suppliedForLoad),chargeInputKW=Math.min(storageChargePotentialV35(hours),surplusKW),storedKWh=Math.min(gridStorageCapacityV35()-st.chargeKWh,chargeInputKW*hours*lim.effCharge);
  if(storedKWh>0){st.chargeKWh=Math.min(gridStorageCapacityV35(),st.chargeKWh+storedKWh);st.throughputKWh+=storedKWh}
+ const renewableSurplusKW=Math.max(0,nonGen-load),generatorChargeKW=Math.max(0,chargeInputKW-renewableSurplusKW),generatorTotalKW=Math.min(genMax,genLoadKW+generatorChargeKW);
  st.lastFlow={day:state.day,phase:state.phase,hours,dischargeKW:storageNeedKW,chargeKW:chargeInputKW,storedKWh,dischargedKWh:storageOutKWh,socPct:gridStorageCapacityV35()>0?st.chargeKWh/gridStorageCapacityV35()*100:0};
- return {storageKW:storageNeedKW,genKW,chargeKW:chargeInputKW,storedKWh,dischargedKWh:storageOutKWh}
+ return {storageKW:storageNeedKW,genKW:generatorTotalKW,genLoadKW,generatorChargeKW,chargeKW:chargeInputKW,storedKWh,dischargedKWh:storageOutKWh}
 }
 
 processSourceSliceV34=function(sourceId,hours){
@@ -60,7 +61,7 @@ processSourceSliceV34=function(sourceId,hours){
   const flow=applyStorageFlowV35(plan,s,hours),c=s.components||centralGridCapacityV34(plan.loadKW);
   if(flow.genKW>0){const fuel=(flow.genKW/Math.max(.001,c.generatorMaxKW||8))*(POWER_SOURCE_TYPES_V24.generator.fuelRateLph||2.2)*hours;state.resources.fuel=Math.max(0,(state.resources.fuel||0)-fuel)}
   const vent=plan.services?.find(x=>x.id==='ventilation');if(vent&&!vent.ok){state.powerOps.brownoutHours=(state.powerOps.brownoutHours||0)+hours;state.base.condition=clamp((state.base.condition??100)-hours*.18,0,100)}
-  state.powerOps.lastDispatch={day:state.day,phase:state.phase,hours,capacityKW:s.maxOutputKW,loadKW:plan.loadKW,serviceLoadKW:plan.serviceLoadKW,chargeLoadKW:plan.chargeLoadKW,storageKW:flow.storageKW,storageChargeKW:flow.chargeKW,generatorKW:flow.genKW,services:plan.services.map(x=>({id:x.id,requestedKW:x.requestedKW,allocatedKW:x.allocatedKW,ok:x.ok}))};
+  state.powerOps.lastDispatch={day:state.day,phase:state.phase,hours,capacityKW:s.maxOutputKW,loadKW:plan.loadKW,serviceLoadKW:plan.serviceLoadKW,chargeLoadKW:plan.chargeLoadKW,storageKW:flow.storageKW,storageChargeKW:flow.chargeKW,generatorKW:flow.genKW,generatorLoadKW:flow.genLoadKW,generatorStorageKW:flow.generatorChargeKW,services:plan.services.map(x=>({id:x.id,requestedKW:x.requestedKW,allocatedKW:x.allocatedKW,ok:x.ok}))};
  }
 };
 
