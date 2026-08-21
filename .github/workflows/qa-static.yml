@@ -1,0 +1,68 @@
+name: QA Static Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: JavaScript syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check game.js
+          for file in src/game-*.js; do
+            echo "checking $file"
+            node --check "$file"
+          done
+
+      - name: Loader and stylesheet consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const loader = fs.readFileSync('game.js', 'utf8');
+          const match = loader.match(/Array\.from\(\{length:(\d+)\}/);
+          if (!match) throw new Error('Cannot find game module loader length in game.js');
+          const count = Number(match[1]);
+          const expected = Array.from({length: count}, (_, i) => `src/game-${String(i).padStart(2, '0')}.js`);
+          const missing = expected.filter(file => !fs.existsSync(file));
+          if (missing.length) throw new Error(`Loader references missing modules: ${missing.join(', ')}`);
+
+          const actual = fs.readdirSync('src')
+            .filter(name => /^game-\d{2}\.js$/.test(name))
+            .sort();
+          if (actual.length !== count) {
+            throw new Error(`Loader count ${count} does not match ${actual.length} game modules`);
+          }
+          const highest = actual.at(-1);
+          const expectedHighest = `game-${String(count - 1).padStart(2, '0')}.js`;
+          if (highest !== expectedHighest) {
+            throw new Error(`Highest module is ${highest}, expected ${expectedHighest}`);
+          }
+
+          const css = fs.readFileSync('style.css', 'utf8');
+          const imports = [...css.matchAll(/@import url\('src\/(style-\d+\.css)'\);/g)].map(m => m[1]);
+          const missingCss = imports.filter(name => !fs.existsSync(path.join('src', name)));
+          if (missingCss.length) throw new Error(`Missing imported stylesheets: ${missingCss.join(', ')}`);
+
+          console.log(`OK: ${count} game modules (${expected[0]} .. ${expected.at(-1)})`);
+          console.log(`OK: ${imports.length} imported split stylesheets exist`);
+          NODE
