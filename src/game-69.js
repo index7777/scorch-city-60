@@ -18,7 +18,7 @@ function searchRecoveryFactorV69(id,mode='full'){
  const n=searchRecordV69(id).visits;
  const table=mode==='quick'?[.56,.28,.14,.08]:[.74,.40,.22,.12];
  const revisit=table[Math.min(n,table.length-1)];
- const early=state.day<=3?.82:state.day<=7?.90:state.day<=10?.96:1;
+ const early=state.day<=3 ? .82 : state.day<=7 ? .90 : state.day<=10 ? .96 : 1;
  return Math.max(.05,Math.min(1,revisit*early))
 }
 function searchBudgetKgV69(mode='full'){
@@ -40,6 +40,8 @@ function recoveryPoolV69(id,mode='full'){
 }
 function markSearchV69(id,mode){const r=searchRecordV69(id);r.visits++;r[mode]=(r[mode]||0)+1;r.lastSearchDay=state.day;saveGame(false);return r}
 function quickSearchTimeV69(loc){return Math.max(.5,Math.round(timeCostFor(loc)*.65*20)/20)}
+
+/* One physical search per location per day; duplicate search stops are invalid before departure. */
 function searchPlanIssuesV69(){
  const it=ensureItineraryV27(),issues=[],seen=new Set(),start=(it.status==='paused'||it.status==='running')?it.index:0;
  for(let i=start;i<it.stops.length;i++){
@@ -62,6 +64,8 @@ runItineraryStepV27=function(){
  if(it.status==='running'&&stop?.action==='search'&&!searchAvailableV69(stop.location))return pauseItineraryV27(`${mapLoc(stop.location)?.name||stop.location}今天已搜索過；隔夜後才能再次搜索`);
  return _runItineraryStepV69()
 };
+
+/* Forecast uses the same reduced recovery pool as actual execution. */
 function withRecoveryPoolsV69(fn){
  const it=ensureItineraryV27(),backups=new Map(),seen=new Set();
  try{
@@ -78,6 +82,8 @@ function withRecoveryPoolsV69(fn){
 }
 const _simulateCargoLayoutV69=simulateCargoLayoutV56;
 simulateCargoLayoutV56=function(){return withRecoveryPoolsV69(()=>_simulateCargoLayoutV69())};
+
+/* Full itinerary search recovers a bounded share and records revisit depletion. */
 const _collectStopLootV69=collectStopLootV27;
 collectStopLootV27=function(loc){
  if(!searchAvailableV69(loc.id)){log(`${loc.name}今天已搜索過，沒有再次進入搜索。`,'major');return}
@@ -96,6 +102,8 @@ collectStopLootV27=function(loc){
  if(r.visits>1)log(`${loc.name}複訪回收效率下降：本次最多處理約 ${Math.round(limited.factor*100)}% 可見剩餘物資，未回收物資仍留在現場。`,'major');
  syncRiskTrendV69();return out
 };
+
+/* Quick search is faster, but only touches public tags and has a tighter recovery budget. */
 searchLocation=function(loc){
  if(!locationKnownV68(loc.id))return toast('尚未偵察：先確認地點後才能快速搜索');
  if(!searchAvailableV69(loc.id))return toast(`${loc.name}今天已搜索過；隔夜後才能再次進入`);
@@ -119,6 +127,8 @@ searchLocation=function(loc){
  toast(`快速搜索完成：${Object.entries(gain).map(([k,v])=>`+${v} ${RES_LABELS[k]||k}`).join(' · ')||'沒有明示資源'}；明天才能再次搜索`);
  $('locationDialog')?.close();render();checkState();saveGame(false)
 };
+
+/* Location/planner UI exposes cooldown and revisit efficiency before commitment. */
 const _openLocationV69=openLocation;
 openLocation=function(id){
  const out=_openLocationV69(id);if(!locationKnownV68(id))return out;
@@ -135,6 +145,8 @@ itineraryPlannerHtmlV27=function(){
  const info=searches.length?`<div class="search-plan-v69 ${issues.length?'blocked':''}"><b>搜索節奏</b><span>${searches.map(s=>`${mapLoc(s.location)?.name||s.location}：${searchAvailableV69(s.location)?Math.round(searchRecoveryFactorV69(s.location,'full')*100)+'% 回收效率':'今日鎖定'}`).join(' · ')}</span>${issues.length?`<small>${issues.join('；')}</small>`:'<small>同一地點每天只能搜索一次；複訪回收效率會遞減。</small>'}</div>`:'';
  return html.replace('<div class="planner-actions">',info+'<div class="planner-actions">')
 };
+
+/* X23: risk rises promptly, but only decays at most one score point per new day. */
 const _rawRiskScoreV69=currentRiskScore;
 function syncRiskTrendV69(){
  ensurePacingV69();const f=state.flags.riskTrendV69,raw=Math.max(0,_rawRiskScoreV69());
@@ -144,6 +156,8 @@ function syncRiskTrendV69(){
  return f.display
 }
 currentRiskScore=function(){return syncRiskTrendV69()};
+
+/* X24: Day 1–3 visibly contain a precursor before hard shortages arrive. */
 const _chainLevelV69=chainLevel;
 chainLevel=function(name){const v=_chainLevelV69(name);return state.day<=3&&name==='water'?Math.max(1,v):v};
 function emitEarlyPressureV69(){
@@ -152,4 +166,5 @@ function emitEarlyPressureV69(){
 }
 const _advanceV69=advance;
 advance=function(){const out=_advanceV69();syncRiskTrendV69();emitEarlyPressureV69();return out};
+
 ensurePacingV69();syncRiskTrendV69();emitEarlyPressureV69();render();
