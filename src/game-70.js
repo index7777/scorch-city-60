@@ -1,5 +1,13 @@
 /* v14.2.2 QA — X23–X26 pacing corrections after readback */
 
+/* Existing saves may already have searched locations but no pacing record. Treat those as prior visits so migration cannot restore first-pass yield. */
+const _searchRecordV70=searchRecordV69;
+searchRecordV69=function(id){
+ const r=_searchRecordV70(id),legacy=!!state.locations?.[id]?.searched;
+ if(legacy&&(r.visits||0)===0&&(r.quick||0)===0&&(r.full||0)===0&&(r.lastSearchDay||0)===0){r.visits=1;r.full=1;r.migratedLegacy=true}
+ return r
+};
+
 /* Early-game survival has handling / evaporation / spoilage overhead. This raises Day 1–7 burn without changing later balance. */
 const _dailyWaterNeedV70=dailyWaterNeed;
 dailyWaterNeed=function(){
