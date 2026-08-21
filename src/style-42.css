@@ -1,0 +1,7 @@
+/* v14.2.2 QA — B1/B3 blocker visibility */
+.itinerary-start-reason-v71,.quick-search-time-v71{display:grid;gap:.22rem;margin:.55rem 0;padding:.65rem .75rem;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.035);border-radius:.5rem}
+.itinerary-start-reason-v71.critical,.quick-search-time-v71{border-color:rgba(255,110,90,.62);background:rgba(130,35,28,.16)}
+.itinerary-start-reason-v71 b,.quick-search-time-v71 b{font-weight:700}
+.itinerary-start-reason-v71.critical span,.quick-search-time-v71 span{color:#ff9d8c}
+#itineraryStart:disabled,#searchLoc:disabled{opacity:.42;filter:saturate(.2);cursor:not-allowed;box-shadow:none;transform:none}
+#itineraryStart:disabled:hover,#searchLoc:disabled:hover{filter:saturate(.2);transform:none}
