@@ -1,0 +1,9 @@
+/* v14.2.2 QA — field role assignment */
+.field-role-box{margin-top:14px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:10px;background:rgba(9,15,19,.52)}
+.field-role-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.field-role-head span{font-size:11px;letter-spacing:.12em;opacity:.68}.field-role-head h4{margin:2px 0 0}.field-role-head>b{font-size:12px;white-space:nowrap}
+.field-role-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.field-role-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.025);min-width:0}
+.field-role-row>span{display:flex;flex-direction:column;gap:2px;min-width:0}.field-role-row b,.field-role-row small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.field-role-row small{opacity:.66}
+.field-role-row select{max-width:150px;min-width:0}
+@media (max-width:760px){.field-role-list{grid-template-columns:1fr}.field-role-head{flex-direction:column}.field-role-row{align-items:flex-start;flex-direction:column}.field-role-row select{width:100%;max-width:none}}
