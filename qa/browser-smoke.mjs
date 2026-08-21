@@ -48,9 +48,32 @@ await test('X23 risk cannot decay after a same-day improvement',async()=>{
  assert(ok,'risk display decayed inside the same day');
 });
 
+await test('X24 Day 1-3 briefing contains an early warning precursor',async()=>{
+ const ok=await evaluate(`(()=>{state.day=2;state.phase='night';state.eventChains.water={level:0};openBrief();const text=document.getElementById('briefContent')?.textContent||'';const good=/前兆/.test(text)&&chainLevel('water')>=1;document.getElementById('briefDialog')?.close();return good})()`);
+ assert(ok,'early briefing did not expose a Day 1-3 precursor');
+});
+
 await test('X25 same-day repeat search remains locked',async()=>{
  const ok=await evaluate(`(()=>{state.day=5;state.phase='night';state.hoursLeft=8;state.locations.store.searched=true;state.intel.store={day:5,verifiedDay:5,summary:'QA',source:'QA',confidence:100};const r=searchRecordV69('store');r.lastSearchDay=5;r.visits=Math.max(1,r.visits||0);openLocation('store');const b=document.getElementById('searchLoc');const good=!!b&&b.disabled&&/明日|Day 6/.test(b.textContent+' '+b.title);document.getElementById('locationDialog')?.close();return good})()`);
  assert(ok,'same-day revisit search was not locked');
+});
+
+await test('X26 quick search leaves hidden loot for a later full itinerary search',async()=>{
+ const ok=await evaluate(`(()=>{
+  state.day=5;state.phase='night';state.hoursLeft=8;state.gear.vehicle=false;state.gear.cart=false;
+  state.locations.store.searched=true;state.intel.store={day:5,verifiedDay:5,summary:'QA',source:'QA',confidence:100};
+  state.locations.store.remaining={water:1,food:1,battery:2,medicine:2};
+  const r=searchRecordV69('store');r.visits=0;r.quick=0;r.full=0;r.lastSearchDay=0;
+  const beforeBattery=state.locations.store.remaining.battery,beforeMedicine=state.locations.store.remaining.medicine;
+  searchLocation(mapLoc('store'));
+  const hiddenUntouched=state.locations.store.remaining.battery===beforeBattery&&state.locations.store.remaining.medicine===beforeMedicine;
+  const quickMarked=searchRecordV69('store').quick===1&&searchRecordV69('store').lastSearchDay===5;
+  state.day=6;state.phase='night';state.hoursLeft=8;
+  collectStopLootV27(mapLoc('store'));
+  const hiddenRecovered=state.locations.store.remaining.battery<beforeBattery||state.locations.store.remaining.medicine<beforeMedicine;
+  return hiddenUntouched&&quickMarked&&hiddenRecovered&&searchRecordV69('store').full===1
+ })()`);
+ assert(ok,'quick search consumed hidden loot or full search could not recover it later');
 });
 
 await sleep(150);
