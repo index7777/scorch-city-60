@@ -98,6 +98,20 @@ function searchLocation(loc){
 const _npcEncounterBaseOpenTrade=openTrade;
 openTrade=function(id){if(!npcKnowledge(id).tradeUnlocked)return openNpcEncounter(id);return _npcEncounterBaseOpenTrade(id)};
 
+/* Keep logs from revealing identities that the player has not learned yet. */
+const _npcEncounterBaseLog=log;
+log=function(msg,type=''){
+ let safe=String(msg);
+ for(const [id,n] of Object.entries(state.npcs||{})){
+  if(!npcKnowledge(id).roleKnown&&safe.includes(n.name))safe=safe.split(n.name).join('某位倖存者');
+ }
+ return _npcEncounterBaseLog(safe,type);
+};
+
+/* Ownership labels also respect player knowledge. */
+const _npcEncounterBaseOwnerLabel=ownerLabel;
+ownerLabel=function(o){if(state.npcs?.[o]&&!npcKnowledge(o).roleKnown)return '一名未確認身份的倖存者';return _npcEncounterBaseOwnerLabel(o)};
+
 /* Expeditions use a result screen. When the player returns from a location with an unknown NPC,
    queue the encounter for the moment the report is closed. */
 const _npcEncounterBaseShowResult=showExpeditionResult;
