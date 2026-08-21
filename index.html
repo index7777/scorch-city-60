@@ -11,26 +11,149 @@
   <header class="topbar">
     <div class="brand"><div class="brand-lockup"><h1>灼城 60</h1><span class="version-tag">v14.2.2 QA STABILIZATION</span></div><p>SCORCHED CITY · RESPONSIVE QA · MAP FIX · INTERACTION STABILIZATION</p></div>
     <div class="status-grid">
-      <div class="stat"><span>天數</span><b id="day">1</b></div><div class="stat"><span>時段</span><b id="phase">夜晚</b></div><div class="stat"><span>環境</span><b id="temp">8°C</b></div><div class="stat"><span>可用時間</span><b id="hours">8h</b></div><div class="stat critical"><span>基地續航</span><b id="daysLeft">—</b></div>
+      <div class="stat"><span>天數</span><b id="day">1</b></div>
+      <div class="stat"><span>時段</span><b id="phase">夜晚</b></div>
+      <div class="stat"><span>環境</span><b id="temp">8°C</b></div>
+      <div class="stat"><span>可用時間</span><b id="hours">8h</b></div>
+      <div class="stat critical"><span>基地續航</span><b id="daysLeft">—</b></div>
     </div>
   </header>
-  <div class="crisis-rail" id="crisisRail"><div class="crisis-title"><span class="pulse-dot"></span><b id="riskLevel">整體風險：低</b></div><div class="crisis-items" id="crisisItems"></div><button type="button" id="soundBtn" class="sound-toggle" title="切換警報音效" aria-pressed="false">音效 OFF</button></div>
-  <section id="onboardingRail" class="onboarding-rail" hidden><div><span id="tutorialKicker" class="tutorial-kicker">STEP 1 / 3</span><b id="tutorialTitle">先把水帶回來</b><p id="tutorialText"></p></div><button id="tutorialCta">開始</button></section>
+
+  <div class="crisis-rail" id="crisisRail">
+    <div class="crisis-title"><span class="pulse-dot"></span><b id="riskLevel">整體風險：低</b></div>
+    <div class="crisis-items" id="crisisItems"></div>
+    <button type="button" id="soundBtn" class="sound-toggle" title="切換警報音效" aria-pressed="false">音效 OFF</button>
+  </div>
+
+  <section id="onboardingRail" class="onboarding-rail" hidden>
+    <div><span id="tutorialKicker" class="tutorial-kicker">STEP 1 / 3</span><b id="tutorialTitle">先把水帶回來</b><p id="tutorialText"></p></div>
+    <button id="tutorialCta">開始</button>
+  </section>
+
   <main class="layout">
-    <aside class="panel left-panel"><section><div class="section-head"><h2>生存資源</h2><button id="inventoryBtn" class="mini">資產總覽</button></div><div class="resource-list" id="resources"></div></section><section><div class="section-head"><h2>基地狀態</h2><span class="section-tag">CENTRAL STATION</span></div><div class="resource-list" id="baseStats"></div></section><div class="left-utility"><button id="restBtn" class="turn-button">結束本時段</button><div class="button-row"><button id="saveBtn" class="secondary">存檔</button><button id="loadBtn" class="secondary">讀檔</button></div><div class="button-row"><button id="newBtn" class="secondary">重開</button><button id="helpBtn" class="secondary">導覽</button></div></div></aside>
+    <aside class="panel left-panel">
+      <section>
+        <div class="section-head"><h2>生存資源</h2><button id="inventoryBtn" class="mini">資產總覽</button></div>
+        <div class="resource-list" id="resources"></div>
+      </section>
+      <section>
+        <div class="section-head"><h2>基地狀態</h2><span class="section-tag">CENTRAL STATION</span></div>
+        <div class="resource-list" id="baseStats"></div>
+      </section>
+      <div class="left-utility">
+        <button id="restBtn" class="turn-button">結束本時段</button>
+        <div class="button-row">
+          <button id="saveBtn" class="secondary">存檔</button>
+          <button id="loadBtn" class="secondary">讀檔</button>
+        </div>
+        <div class="button-row">
+          <button id="newBtn" class="secondary">重開</button>
+          <button id="helpBtn" class="secondary">導覽</button>
+        </div>
+      </div>
+    </aside>
+
     <section class="city-wrap">
-      <div class="city-header"><div><h2>廢城市區</h2><p id="objective"></p></div><div class="legend"><span><i class="dot safe"></i>可安全行動</span><span><i class="dot danger"></i>高熱限制</span><span><i class="dot base"></i>基地</span><span><i class="dot cold"></i>冷站</span><span><i class="dot rumor"></i>情報</span></div></div>
-      <nav class="command-deck consolidated" aria-label="主要操作"><button id="actionCenterBtn" class="command-card primary-action"><span>行動中心</span><small>目標 → 情報 → 路線 → 裝載 → 出發</small></button><button id="baseMgmtBtn" class="command-card"><span>基地</span><small>工作、人員與配給</small></button><button id="cityOpsBtn" class="command-card"><span>城市</span><small>情報、聚落與物流</small></button><button id="researchBtn" class="command-card"><span>科技</span><small>研究與解鎖</small></button><button id="craftBtn" class="command-card"><span>工程</span><small>製作與設施</small></button><button id="briefBtn" class="command-card alert"><span>簡報</span><small>風險與優先級</small></button><button id="coreProjectBtn" class="command-card core"><span>終局工程</span><small>冷源核心 10 階段</small></button></nav>
-      <div class="map-shell"><div class="environment-readout"><span>外部環境</span><b id="envReadout">夜間低溫窗口</b><em id="heatIndex">8°C</em></div><div class="map-tools" id="mapTools"><button id="routePlanBtn" class="map-tool">路線規劃</button><button class="map-tool" data-mapfilter="all">全部</button><button class="map-tool" data-mapfilter="resources">資源</button><button class="map-tool" data-mapfilter="assets">大型資產</button><button class="map-tool" data-mapfilter="cold">冷卻</button><button class="map-tool" data-mapfilter="people">人口</button><button class="map-tool" data-mapfilter="notes">標記</button></div><div id="map" class="map"></div><div id="mapPlannerPanel" class="map-planner-panel"></div><div class="map-vignette"></div></div>
-      <section class="personnel-band"><div class="section-head"><h2>核心人員</h2><span class="section-tag">KEY PERSONNEL · QA</span></div><div id="personnelStrip" class="personnel-strip"></div></section><div class="bottom-strip"><div><span>研究資料</span><b id="researchData">0</b></div><div><span>已知倖存人口</span><b id="knownPop">1</b></div><div><span>中央站容量</span><b id="ventCapacity">0</b></div><div><span>已知可用水</span><b id="knownWater">?</b></div><div><span>已發現大型資產</span><b id="knownAssets">0</b></div></div>
+      <div class="city-header">
+        <div><h2>廢城市區</h2><p id="objective"></p></div>
+        <div class="legend">
+          <span><i class="dot safe"></i>可安全行動</span>
+          <span><i class="dot danger"></i>高熱限制</span>
+          <span><i class="dot base"></i>基地</span>
+          <span><i class="dot cold"></i>冷站</span>
+          <span><i class="dot rumor"></i>情報</span>
+        </div>
+      </div>
+      <nav class="command-deck consolidated" aria-label="主要操作">
+        <button id="actionCenterBtn" class="command-card primary-action"><span>行動中心</span><small>目標 → 情報 → 路線 → 裝載 → 出發</small></button>
+        <button id="baseMgmtBtn" class="command-card"><span>基地</span><small>工作、人員與配給</small></button>
+        <button id="cityOpsBtn" class="command-card"><span>城市</span><small>情報、聚落與物流</small></button>
+        <button id="researchBtn" class="command-card"><span>科技</span><small>研究與解鎖</small></button>
+        <button id="craftBtn" class="command-card"><span>工程</span><small>製作與設施</small></button>
+        <button id="briefBtn" class="command-card alert"><span>簡報</span><small>風險與優先級</small></button>
+        <button id="coreProjectBtn" class="command-card core"><span>終局工程</span><small>冷源核心 10 階段</small></button>
+      </nav>
+      <div class="map-shell">
+        <div class="environment-readout"><span>外部環境</span><b id="envReadout">夜間低溫窗口</b><em id="heatIndex">8°C</em></div>
+        <div class="map-tools" id="mapTools">
+          <button id="routePlanBtn" class="map-tool active">路線規劃</button>
+          <button class="map-tool" data-mapfilter="all">全部</button>
+          <button class="map-tool" data-mapfilter="resources">資源</button>
+          <button class="map-tool" data-mapfilter="assets">大型資產</button>
+          <button class="map-tool" data-mapfilter="cold">冷卻</button>
+          <button class="map-tool" data-mapfilter="people">人口</button>
+          <button class="map-tool" data-mapfilter="notes">標記</button>
+        </div>
+        <div id="map" class="map"></div>
+        <div id="mapPlannerPanel" class="map-planner-panel"></div>
+        <div class="map-vignette"></div>
+      </div>
+      <div class="bottom-strip">
+        <div><span>研究資料</span><b id="researchData">0</b></div>
+        <div><span>已知倖存人口</span><b id="knownPop">1</b></div>
+        <div><span>中央站容量</span><b id="ventCapacity">0</b></div>
+        <div><span>已知可用水</span><b id="knownWater">?</b></div>
+        <div><span>已發現大型資產</span><b id="knownAssets">0</b></div>
+      </div>
     </section>
-    <aside class="panel right-panel"><div class="section-head"><h2>城市動態</h2><button id="clearLogBtn" class="mini">清空</button></div><div class="event-summary" id="eventSummary"></div><div id="log" class="log"></div></aside>
+
+    <aside class="panel right-panel">
+      <div class="section-head"><h2>城市動態</h2><button id="clearLogBtn" class="mini">清空</button></div>
+      <div class="event-summary" id="eventSummary"></div>
+      <div id="log" class="log"></div>
+    </aside>
   </main>
 </div>
+
 <dialog id="locationDialog"><div class="dialog-body"><button type="button" class="close" id="closeLocation" data-close-dialog="locationDialog" aria-label="關閉">×</button><h2 id="locTitle"></h2><p id="locDesc"></p><div id="locMeta" class="meta-grid"></div><div id="locStock" class="stock-preview"></div><div id="locActions" class="dialog-actions"></div></div></dialog>
-<dialog id="tradeDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="tradeDialog">×</button><h2 id="tradeTitle"></h2><div id="tradeContent"></div></div></dialog><dialog id="craftDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="craftDialog">×</button><h2>製作／工程</h2><div id="craftList" class="card-list"></div></div></dialog><dialog id="researchDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="researchDialog">×</button><h2>工程研究</h2><div id="researchList" class="card-list"></div></div></dialog><dialog id="inventoryDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="inventoryDialog">×</button><h2>庫存／資產總覽</h2><div id="inventoryContent"></div></div></dialog><dialog id="settlementDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="settlementDialog">×</button><h2>倖存者與聚落</h2><div id="settlementContent"></div></div></dialog><dialog id="cityOpsDialog"><div class="dialog-body"><button type="button" class="close" id="closeCityOps" data-close-dialog="cityOpsDialog">×</button><h2>城市作業</h2><p class="muted">情報、聚落與物流集中於此。</p><div class="city-hub-actions"><button id="cityIntel"><b>城市情報</b><small>情報、道路與玩家標記</small></button><button id="citySettlements"><b>聚落</b><small>人口、需求與遷移</small></button><button id="cityLogistics"><b>物流</b><small>大型設備、所有權與搬運</small></button></div></div></dialog><dialog id="intelDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="intelDialog">×</button><h2>城市情報</h2><div id="intelContent"></div></div></dialog><dialog id="briefDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="briefDialog">×</button><h2>每日簡報／風險預測</h2><div id="briefContent"></div></div></dialog><dialog id="baseMgmtDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="baseMgmtDialog">×</button><h2>基地管理／工作分配</h2><div id="baseMgmtContent"></div></div></dialog><dialog id="coreProjectDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="coreProjectDialog">×</button><h2>冷源核心終局工程</h2><div id="coreProjectContent"></div></div></dialog><dialog id="rationDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="rationDialog">×</button><h2>配給／中央站人口</h2><div id="rationContent"></div></div></dialog><dialog id="logisticsDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="logisticsDialog">×</button><h2>城市物流／大型資產</h2><div id="logisticsContent"></div></div></dialog><dialog id="actionCenterDialog"><div class="dialog-body wide action-center"><button type="button" class="close" id="closeActionCenter" data-close-dialog="actionCenterDialog">×</button><div class="action-title"><div><span>FIELD OPERATIONS</span><h2>行動中心</h2></div><div id="actionSteps" class="action-steps"></div></div><p class="muted">目標、情報、路線、裝載與出發整合成同一條流程。</p><div id="actionCenterContent"></div></div></dialog><dialog id="expeditionDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="expeditionDialog">×</button><h2>遠征規劃</h2><div id="expeditionContent"></div></div></dialog><dialog id="incidentDialog"><div class="dialog-body incident-box"><button type="button" class="close" data-close-dialog="incidentDialog">×</button><h2 id="incidentTitle">遠征途中</h2><p id="incidentBody" class="incident-copy"></p><div id="incidentChoices" class="incident-choices"></div></div></dialog><dialog id="helpDialog"><div class="dialog-body wide"><button type="button" class="close" data-close-dialog="helpDialog">×</button><h2>玩法規則</h2><ul class="rules"><li>Day 1–29 夜間為主要安全外出窗口，依序縮短為 8／6／4／2 小時。</li><li>Day 30 進入 100°C 永晝。</li><li>城市物資有限且不刷新，NPC 也會搜索與搬運。</li><li>沒有戰鬥與武器；衝突透過所有權、交易、截胡與資源控制發生。</li><li>大型設備必須實際搬運。</li></ul></div></dialog><dialog id="expeditionResultDialog"><div class="dialog-body result-dialog"><button type="button" class="close" data-close-dialog="expeditionResultDialog">×</button><span class="result-kicker" id="resultKicker">EXPEDITION REPORT</span><h2 id="resultTitle">遠征結果</h2><div id="resultBody"></div><div class="dialog-actions"><button onclick="document.getElementById('expeditionResultDialog').close()">返回城市</button><button class="secondary" onclick="document.getElementById('expeditionResultDialog').close();document.getElementById('actionCenterBtn').click()">規劃下一趟</button></div></div></dialog>
-<div id="dayTransition" class="day-transition" aria-hidden="true"><div class="transition-card"><span id="transitionKicker">SYSTEM EVENT</span><h2 id="transitionTitle">永晝開始</h2><p id="transitionText">太陽不再落下。從現在開始，安全區必須由你自己製造。</p><button id="transitionClose">進入永晝</button></div></div><div id="toast"></div>
-<dialog id="tutorialDialog"><div class="dialog-body tutorial-dialog"><button type="button" class="close" data-close-dialog="tutorialDialog">×</button><span class="tutorial-kicker">FIRST HOUR</span><h2>第一個目標只有一個：先活過今晚</h2><p>屋內安全，但沒有穩定水源。</p><div class="tutorial-sequence"><div><b>1</b><span>去便利商店把水帶回來</span></div><div><b>2</b><span>取得推車，理解載重</span></div><div><b>3</b><span>發現大型水桶，理解物流</span></div></div><div class="dialog-actions"><button id="tutorialStart">開始導覽</button><button id="tutorialSkip" class="secondary">跳過，我自己玩</button><button id="tutorialRestart" class="secondary">重置導覽</button><button id="tutorialRules" class="secondary">完整規則</button></div></div></dialog>
+<dialog id="tradeDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeTrade" data-close-dialog="tradeDialog" aria-label="關閉">×</button><h2 id="tradeTitle"></h2><div id="tradeContent"></div></div></dialog>
+<dialog id="craftDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeCraft" data-close-dialog="craftDialog" aria-label="關閉">×</button><h2>製作／工程</h2><p class="muted">研究決定你理解什麼；材料、電力與現有設施決定你能不能真的做出來。</p><div id="craftList" class="card-list"></div></div></dialog>
+<dialog id="researchDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeResearch" data-close-dialog="researchDialog" aria-label="關閉">×</button><h2>工程研究</h2><p class="muted">研究資料來自研究園區、醫院設備文件與工業設施。研究完成後永久解鎖。</p><div id="researchList" class="card-list"></div></div></dialog>
+<dialog id="inventoryDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeInventory" data-close-dialog="inventoryDialog" aria-label="關閉">×</button><h2>庫存／資產總覽</h2><div id="inventoryContent"></div></div></dialog>
+<dialog id="settlementDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeSettlement" data-close-dialog="settlementDialog" aria-label="關閉">×</button><h2>倖存者與聚落</h2><div id="settlementContent"></div></div></dialog>
+<dialog id="cityOpsDialog"><div class="dialog-body"><button type="button" class="close" id="closeCityOps" data-close-dialog="cityOpsDialog" aria-label="關閉">×</button><h2>城市作業</h2><p class="muted">城市相關功能集中於此，避免在主畫面重複出現入口。</p><div class="city-hub-actions"><button id="cityIntel"><b>城市情報</b><small>情報、道路與玩家標記</small></button><button id="citySettlements"><b>聚落</b><small>人口、需求與遷移</small></button><button id="cityLogistics"><b>物流</b><small>大型設備、所有權與搬運</small></button></div></div></dialog>
+<dialog id="intelDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeIntel" data-close-dialog="intelDialog" aria-label="關閉">×</button><h2>城市情報</h2><p class="muted">情報會過期。NPC 親眼看到的資源位置會透過交易、聚落與接觸逐步傳播。</p><div id="intelContent"></div></div></dialog>
+<dialog id="briefDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeBrief" data-close-dialog="briefDialog" aria-label="關閉">×</button><h2>每日簡報／風險預測</h2><p class="muted">把目前資源、城市事件鏈與終局時程整理成可行動的優先順序。預測只使用你已知的資訊。</p><div id="briefContent"></div></div></dialog>
+<dialog id="baseMgmtDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeBaseMgmt" data-close-dialog="baseMgmtDialog" aria-label="關閉">×</button><h2>基地管理／工作分配</h2><p class="muted">分配中央站人力。工作效率會受專業、疲勞、配給與設施狀況影響。</p><div id="baseMgmtContent"></div></div></dialog>
+<dialog id="coreProjectDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeCoreProject" data-close-dialog="coreProjectDialog" aria-label="關閉">×</button><h2>冷源核心終局工程</h2><p class="muted">最終工程不是一次製作。先啟動當前階段，再由核心工程隊每天投入人時；材料、設備、冷卻與時間缺一不可。</p><div id="coreProjectContent"></div></div></dialog>
+<dialog id="rationDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeRation" data-close-dialog="rationDialog" aria-label="關閉">×</button><h2>配給／中央站人口</h2><div id="rationContent"></div></div></dialog>
+<dialog id="logisticsDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeLogistics" data-close-dialog="logisticsDialog" aria-label="關閉">×</button><h2>城市物流／大型資產</h2><p class="muted">大型設備不會進入一般庫存。必須先發現，再安排搬運；Day 30 後搬運會額外消耗冷卻與電力。</p><div id="logisticsContent"></div></div></dialog>
+
+<dialog id="actionCenterDialog"><div class="dialog-body wide action-center"><button type="button" class="close" id="closeActionCenter" data-close-dialog="actionCenterDialog" aria-label="關閉">×</button><div class="action-title"><div><span>FIELD OPERATIONS</span><h2>行動中心</h2></div><div id="actionSteps" class="action-steps"></div></div><p class="muted">一條流程完成目標選擇、情報判讀、路線、裝載與出發。世界狀態與遠征結果會直接回寫城市地圖。</p><div id="actionCenterContent"></div></div></dialog>
+
+<dialog id="expeditionDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeExpedition" data-close-dialog="expeditionDialog" aria-label="關閉">×</button><h2>遠征規劃</h2><p class="muted">先決定目的地、交通工具、補給與回收優先級。出發前先估算時間與載重；途中可能出現可預測的路況、熱負荷或設備事件，你可以繼續、改變計畫或撤退。</p><div id="expeditionContent"></div></div></dialog>
+
+<dialog id="incidentDialog"><div class="dialog-body incident-box"><button type="button" class="close" id="closeIncident" data-close-dialog="incidentDialog" aria-label="關閉">×</button><h2 id="incidentTitle">遠征途中</h2><p id="incidentBody" class="incident-copy"></p><div id="incidentChoices" class="incident-choices"></div><p class="muted">撤退不算任務失敗：你會失去部分時間與補給，但能避免把一次壞判斷變成整局災難。</p></div></dialog>
+<dialog id="helpDialog"><div class="dialog-body wide"><button type="button" class="close" id="closeHelp" data-close-dialog="helpDialog" aria-label="關閉">×</button><h2>玩法規則</h2><ul class="rules">
+<li>Day 1–29 只有夜晚能安全長時間搜尋；夜晚依序縮短為 8／6／4／2 小時。</li>
+<li>Day 30 進入 100°C 永晝，初始耐熱屋不再是長期基地。</li>
+<li>所有城市物資有限且不刷新；NPC 也會搜索、消耗、搬家、彼此交易並散播情報。</li>
+<li>大型設備有實際所在地與所有權：NPC 也可能先搬走；你可以交換取得或直接截胡，但會影響關係。</li>
+<li>NPC 的需求會依庫存改變，交易不再是固定商店價格。</li>
+<li>沒有戰鬥與武器。你可以公平交換，也能直接搶走 NPC 的物資，但後續合作會受損。</li>
+<li>車輛與推車有實際載重；搜索、搬水與大型設備都受裝載能力限制。Day 30 後還會增加冷卻與能源成本。</li><li>遠征規劃可以先選目的地、交通、補給、回收優先級與大型設備，預估風險後再出發。</li><li>Day 30 後中央站必須管理人口、配給、工作分配、疲勞與冷卻容量；超載會帶來額外耗水與離開風險。</li>
+<li>冷源核心必須經過偵察、清路、中繼冷站、拆離、重運、吊裝、配電、冷卻迴路、壓測與穩定運轉十個階段。</li>
+<li>核心工程需要專門分配人力。材料齊全不代表立即完成；疲勞、配給與中央站狀況會影響每天的人時產出。</li>
+<li>事件會以「前兆 → 壓力 → 危機」演進。每日簡報會顯示水、冷卻、設備、人口與終局時程的風險，不會直接替你做決定。</li>
+<li>真正目標不是單純活著，而是找到冷源核心、修復中央通風站並讓更多人活到 Day 60。</li>
+</ul></div></dialog>
+
+<dialog id="expeditionResultDialog"><div class="dialog-body result-dialog"><button type="button" class="close" id="closeExpeditionResult" data-close-dialog="expeditionResultDialog" aria-label="關閉">×</button><span class="result-kicker" id="resultKicker">EXPEDITION REPORT</span><h2 id="resultTitle">遠征結果</h2><div id="resultBody"></div><div class="dialog-actions"><button onclick="document.getElementById('expeditionResultDialog').close()">返回城市</button><button class="secondary" onclick="document.getElementById('expeditionResultDialog').close();document.getElementById('actionCenterBtn').click()">規劃下一趟</button></div></div></dialog>
+<div id="dayTransition" class="day-transition" aria-hidden="true">
+  <div class="transition-card">
+    <span id="transitionKicker">SYSTEM EVENT</span>
+    <h2 id="transitionTitle">永晝開始</h2>
+    <p id="transitionText">太陽不再落下。從現在開始，安全區必須由你自己製造。</p>
+    <button id="transitionClose">進入永晝</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<dialog id="tutorialDialog"><div class="dialog-body tutorial-dialog"><button type="button" class="close" id="closeTutorial" data-close-dialog="tutorialDialog" aria-label="關閉">×</button><span class="tutorial-kicker">FIRST HOUR</span><h2>第一個目標只有一個：先活過今晚</h2><p>屋內安全，但沒有穩定水源。你不需要現在理解冷源核心、中央站工程或完整 NPC 經濟。</p><div class="tutorial-sequence"><div><b>1</b><span>去便利商店把水帶回來</span></div><div><b>2</b><span>取得推車，理解載重</span></div><div><b>3</b><span>發現大型水桶，理解物流</span></div></div><div class="dialog-actions"><button id="tutorialStart">開始導覽</button><button id="tutorialSkip" class="secondary">跳過，我自己玩</button><button id="tutorialRestart" class="secondary">重置導覽</button><button id="tutorialRules" class="secondary">完整規則</button></div></div></dialog>
+
+<script>
+window.addEventListener('error',function(e){if(e.target&&e.target.tagName==='IMG'){e.target.hidden=true;e.target.closest('.location-scene,.expedition-scene,.portrait-card,.asset-thumb')?.classList.add('asset-fallback')}},true);
+</script>
 <script src="game.js"></script>
 </body>
 </html>
