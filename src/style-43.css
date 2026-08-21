@@ -1,0 +1,5 @@
+/* v14.2.2 QA — consistency stabilization */
+.npc-location-v73{display:inline-block;margin-top:.35rem;font-size:.82rem;opacity:.78;letter-spacing:.02em}
+#riskLevel[data-risk-band="calm"]{opacity:.82}
+#riskLevel[data-risk-band="alert"],#riskLevel[data-risk-band="tense"]{font-weight:700}
+#riskLevel[data-risk-band="danger"],#riskLevel[data-risk-band="collapse"]{font-weight:800}
