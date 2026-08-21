@@ -1,0 +1,15 @@
+/* v14.2.2 QA — cargo stow / access / balance */
+.cargo-layout-box{border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:12px;margin:12px 0;background:rgba(8,12,16,.64)}
+.cargo-layout-box.blocked{border-color:rgba(255,120,90,.45)}
+.cargo-zone-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.cargo-zone-meter{display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.025);min-width:0}
+.cargo-zone-meter b{grid-column:1/-1;font-size:.82rem}
+.cargo-zone-meter span{font-size:.74rem;color:var(--muted,#9da7ad);white-space:nowrap}
+.cargo-layout-list{display:grid;gap:7px}
+.cargo-layout-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,.75fr);gap:10px;align-items:center;padding:8px;border-top:1px solid rgba(255,255,255,.06)}
+.cargo-layout-row span{min-width:0;display:grid;gap:2px}
+.cargo-layout-row small{color:var(--muted,#9da7ad);line-height:1.35}
+.cargo-layout-row select{width:100%;min-width:0}
+.cargo-access-note{margin-top:9px;padding:8px;border-left:3px solid rgba(255,190,90,.65);background:rgba(255,190,90,.07);font-size:.78rem;line-height:1.45}
+@media(max-width:1279px){.cargo-zone-grid{grid-template-columns:1fr}.cargo-layout-row{grid-template-columns:1fr}.cargo-layout-row select{max-width:none}}
+@media(max-width:899px){.cargo-layout-box{padding:10px}.cargo-zone-meter span{white-space:normal}}
