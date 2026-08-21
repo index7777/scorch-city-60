@@ -15,7 +15,7 @@ function itineraryRemainingEstimateV28(){
  return {ok:true,left,total,buffer:Math.round((left-total)*100)/100,travel:Math.round(travel*100)/100,actions:Math.round(actions*100)/100,returnHours:Math.round(returnHours*100)/100,rows};
 }
 function itineraryRecoveryStatusV28(){
- const it=ensureItineraryV27(),e=itineraryRemainingEstimateV28();
+ const e=itineraryRemainingEstimateV28();
  if(!e.ok)return {severity:'blocked',...e};
  if(e.total<=e.left+1e-6)return {severity:'safe',...e};
  const lastKeep=[...e.rows].reverse().find(x=>x.canKeep);
@@ -46,15 +46,15 @@ function applyItineraryDelayV28(hours,reason='突發事件'){
 function itineraryRecoveryHtmlV28(){
  const it=ensureItineraryV27();if(it.status!=='paused')return '';
  const s=itineraryRecoveryStatusV28(),where=locationLabelV24(it.current||'base');
- const head=`<div class="itinerary-recovery ${s.severity}"><div class="recovery-head"><span>行程重算</span><b>目前位置：${where}</b></div>`;
- if(!s.ok)return `${head}<div class="action-warning">${s.reason}</div><div class="planner-actions"><button id="itReturnNow">立即返程</button></div></div>`;
+ const head=`<section class="itinerary-recovery ${s.severity}"><div class="recovery-head"><span>行程重算</span><b>目前位置：${where}</b></div>`;
+ if(!s.ok)return `${head}<div class="action-warning">${s.reason}</div><div class="planner-actions"><button id="itReturnNow">立即返程</button></div></section>`;
  const rows=s.rows.map(x=>{const l=mapLoc(x.stop.location),a=itineraryActionsV27(x.stop.location).find(v=>v[0]===x.stop.action);return `<div class="recovery-stop ${x.canKeep?'can-keep':'will-miss'}"><span>${x.index+1}</span><div><b>${l?.name||x.stop.location}</b><small>${a?.[1]||x.stop.action} · 若保留到此站並返程，共需 ${x.keepThrough.toFixed(1)}h</small></div><em>${x.canKeep?'可完成':'來不及'}</em><button class="mini secondary" data-recovery-drop="${x.index}">砍掉</button></div>`}).join('')||'<p class="muted">沒有剩餘站點，只需要規劃返程。</p>';
  const summary=s.severity==='safe'?`<div class="action-ready">事件後仍可完成剩餘行程。需要 ${s.total.toFixed(1)}h，緩衝 ${s.buffer.toFixed(1)}h。</div>`:`<div class="action-warning">剩餘 ${s.left.toFixed(1)}h，但原剩餘行程需要 ${s.total.toFixed(1)}h。至少超出 ${Math.abs(s.buffer).toFixed(1)}h。</div>`;
  const trim=s.severity==='overrun'?`<button id="itTrimFeasible" class="secondary">只保留能完成的站</button>`:'';
- return `${head}${summary}<div class="recovery-stop-list">${rows}</div><div class="planner-actions"><button id="itRecoveryContinue" ${s.severity==='overrun'?'disabled':''}>照新計畫繼續</button>${trim}<button id="itReturnNow" class="secondary">立即返程</button></div></div>`
+ return `${head}${summary}<div class="recovery-stop-list">${rows}</div><div class="planner-actions"><button id="itRecoveryContinue" ${s.severity==='overrun'?'disabled':''}>照新計畫繼續</button>${trim}<button id="itReturnNow" class="secondary">立即返程</button></div></section>`
 }
 const _plannerHtmlV28=itineraryPlannerHtmlV27;
-itineraryPlannerHtmlV27=function(){const html=_plannerHtmlV28();return html.replace('</div>',`</div>${itineraryRecoveryHtmlV28()}`)};
+itineraryPlannerHtmlV27=function(){return _plannerHtmlV28()+itineraryRecoveryHtmlV28()};
 const _bindItineraryV28=bindItineraryPlannerV27;
 bindItineraryPlannerV27=function(){
  _bindItineraryV28();
