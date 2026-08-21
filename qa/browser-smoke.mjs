@@ -40,6 +40,7 @@ await test('B1 over-budget itinerary shows disabled start and explicit overrun w
 await test('B2 feasible itinerary start click reaches execution handler',async()=>{
  const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=8;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart');if(!b||b.disabled||!itineraryStartStateV71().ok)return false;const before=ensureItineraryV27().status;b.click();const after=ensureItineraryV27().status;return before==='planning'&&after!=='planning'})()`);
  assert(ok,'enabled itinerary start click did not reach execution');
+ await waitFor(()=>evaluate(`ensureItineraryV27().status!=='running'`),10000);
 });
 
 await test('X23 risk cannot decay after a same-day improvement',async()=>{
