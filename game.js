@@ -10,9 +10,24 @@
  const files=Array.from({length:23},(_,i)=>`src/game-${String(i).padStart(2,'0')}.js`);
  Promise.all(files.map(src=>fetch(src).then(r=>{if(!r.ok)throw new Error(`Failed to load ${src}: ${r.status}`);return r.text()}))).then(parts=>{
   (0,eval)(parts.join('\n'));
+  const tutorial=document.getElementById('tutorialDialog');
+  let tutorialGate=true,showTutorial=null;
+  if(tutorial&&typeof tutorial.showModal==='function'){
+   showTutorial=tutorial.showModal.bind(tutorial);
+   tutorial.showModal=(...args)=>{if(!tutorialGate&&!tutorial.open)return showTutorial(...args)};
+   if(tutorial.open)tutorial.close();
+  }
   $e('demoEntryStatus').textContent='Demo 已就緒';
   $e('demoStart').disabled=false;$e('demoContinue').disabled=false;
-  $e('demoStart').onclick=()=>hideEntry();
-  $e('demoContinue').onclick=()=>{hideEntry();const load=document.getElementById('loadBtn');if(load)load.click()};
+  $e('demoStart').onclick=()=>{
+   hideEntry();
+   tutorialGate=false;
+   if(showTutorial&&!tutorial.open)setTimeout(()=>showTutorial(),0);
+  };
+  $e('demoContinue').onclick=()=>{
+   hideEntry();
+   const load=document.getElementById('loadBtn');if(load)load.click();
+   setTimeout(()=>{tutorialGate=false},250);
+  };
  }).catch(err=>{console.error(err);$e('demoEntryStatus').textContent='遊戲程式載入失敗，請重新整理。';const t=document.getElementById('toast');if(t){t.textContent='遊戲程式載入失敗，請重新整理。';t.classList.add('show')}})
 })();
