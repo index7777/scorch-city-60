@@ -1,0 +1,12 @@
+/* v14.2.2 QA — large asset condition / repair UI */
+.asset-maint-card{border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:12px;margin:12px 0;background:rgba(8,12,16,.64);min-width:0}
+.asset-maint-list{display:grid;gap:7px;margin-top:10px}
+.asset-maint-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.9fr);gap:10px;align-items:center;padding:9px;border-top:1px solid rgba(255,255,255,.06);min-width:0}
+.asset-maint-row>div:first-child{display:grid;gap:3px;min-width:0}
+.asset-maint-row small{color:var(--muted,#9da7ad);line-height:1.35}
+.asset-maint-row.warn{border-left:3px solid rgba(255,190,90,.65);padding-left:8px}
+.asset-maint-row.critical{border-left:3px solid rgba(255,110,90,.72);padding-left:8px;background:rgba(255,110,90,.045)}
+.asset-maint-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap;min-width:0}
+.asset-maint-actions button{width:auto;max-width:100%;white-space:normal;text-align:center}
+@media(max-width:1279px){.asset-maint-row{grid-template-columns:1fr}.asset-maint-actions{justify-content:flex-start}}
+@media(max-width:899px){.asset-maint-card{padding:10px}.asset-maint-actions{display:grid;grid-template-columns:1fr}.asset-maint-actions button{width:100%}}
