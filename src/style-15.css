@@ -1,0 +1,14 @@
+/* v14.2.2 QA — safe-zone population redistribution */
+.population-redistribution{margin-top:18px;padding:14px;border:1px solid var(--line,rgba(255,255,255,.14));border-radius:12px;min-width:0}
+.safe-zone-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.safe-zone-card{padding:12px;border:1px solid var(--line,rgba(255,255,255,.12));border-radius:10px;min-width:0;background:rgba(255,255,255,.025)}
+.safe-zone-card.over{border-color:rgba(255,140,110,.48)}
+.safe-zone-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:9px 0}
+.safe-zone-meta span{display:flex;justify-content:space-between;gap:10px;min-width:0;font-size:.88rem}
+.safe-zone-actions{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0}
+.npc-redistribute-list{display:grid;gap:8px;margin-top:8px}
+.npc-redistribute{display:grid;grid-template-columns:minmax(140px,1fr) minmax(150px,.9fr) auto;gap:8px;align-items:center;padding:9px;border:1px solid var(--line,rgba(255,255,255,.11));border-radius:9px;min-width:0}
+.npc-redistribute span{display:grid;gap:2px;min-width:0}.npc-redistribute small{opacity:.7}.npc-redistribute select{min-width:0;width:100%}
+.population-redistribution h4{margin:14px 0 6px}
+@media (max-width:1279px){.safe-zone-grid{grid-template-columns:1fr}.npc-redistribute{grid-template-columns:minmax(120px,1fr) minmax(130px,1fr);}.npc-redistribute button{grid-column:1/-1;width:100%}}
+@media (max-width:899px){.safe-zone-meta{grid-template-columns:1fr}.npc-redistribute{grid-template-columns:1fr}.npc-redistribute button{grid-column:auto}.safe-zone-actions button{flex:1 1 120px}}
