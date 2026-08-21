@@ -29,6 +29,7 @@ jobs:
             echo "checking $file"
             node --check "$file"
           done
+          node --check qa/regression-invariants.mjs
 
       - name: Loader-equivalent concatenated syntax check
         shell: bash
@@ -84,3 +85,6 @@ jobs:
           console.log(`OK: ${count} game modules (${expected[0]} .. ${expected.at(-1)})`);
           console.log(`OK: ${imports.length} imported split stylesheets exist`);
           NODE
+
+      - name: Player-feedback regression invariants
+        run: node qa/regression-invariants.mjs
