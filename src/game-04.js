@@ -7,9 +7,11 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show')
 function hasCost(cost){return Object.entries(cost).every(([k,v])=>(state.resources[k]||0)>=v)}
 function pay(cost){Object.entries(cost).forEach(([k,v])=>state.resources[k]-=v)}
 function aliveNpcCount(){return Object.values(state.npcs).filter(n=>n.alive).length}
+function npcKnown(n){return !!n&&!!state.locations[n.location]?.searched}
+function knownNpcCount(){return Object.values(state.npcs).filter(n=>n.alive&&npcKnown(n)).length}
 function settlementPopulation(){return Object.values(state.settlements).reduce((a,s)=>a+s.population,0)}
 function knownPopulation(){return state.base.population+settlementPopulation()}
-function totalLiving(){return knownPopulation()+aliveNpcCount()}
+function totalLiving(){return knownPopulation()+knownNpcCount()}
 function dailyWaterNeed(){let n=Math.max(1,state.base.population)*state.ration.water;n-=state.base.waterTreatment*1.5;if(state.day>=30&&state.base.ventilation===0)n+=2;if(overCapacity()>0)n+=Math.ceil(overCapacity()*.65);return Math.max(1,Math.ceil(n))}
 function dailyFoodNeed(){return Math.max(1,Math.ceil(state.base.population*state.ration.food))}
 function daysOfWater(){return Math.max(0,Math.floor(state.resources.water/Math.max(1,dailyWaterNeed())))}
@@ -28,7 +30,7 @@ function newGame(){if(confirm('確定重新開局？目前進度會被覆蓋。'
 function render(){
  $('day').textContent=state.day;$('phase').textContent=state.day>=30?'永晝':state.phase==='night'?'夜晚':'白晝';$('temp').textContent=(state.day>=30?100:(state.phase==='night'?8:dayTemp(state.day)))+'°C';$('hours').textContent=state.day>=30?'∞':state.hoursLeft+'h';$('daysLeft').textContent=daysOfWater()+' 天';$('objective').textContent=objective();
  $('researchData').textContent=state.resources.data;$('knownPop').textContent=totalLiving();$('ventCapacity').textContent=state.base.ventCapacity;$('knownWater').textContent=knownCityWater();$('knownAssets').textContent=Object.values(state.assets).filter(a=>a.discovered).length+'/'+assetDefs.length;
- renderResources();renderBase();renderMap();renderPersonnel();renderLog();renderSummary();renderV13();renderOnboarding();applyProgressiveUI();saveGame(false);
+ renderResources();renderBase();renderMap();renderLog();renderSummary();renderV13();renderOnboarding();applyProgressiveUI();saveGame(false);
  $('restBtn').textContent=state.day>=30?'推進 1 天':state.phase==='night'?'結束夜晚':'等待至夜晚';
 }
 function tutorialStage(){
