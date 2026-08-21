@@ -1,0 +1,6 @@
+/* v14.2.2 QA — explicit field tool carry custody */
+.field-tool-carry-box{margin:10px 0 12px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:rgba(255,255,255,.02)}
+.field-tool-carry-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.field-tool-carry{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:8px;min-width:0}
+.field-tool-carry>span{display:flex;flex-direction:column;gap:2px;min-width:0}.field-tool-carry small{opacity:.66}.field-tool-carry b,.field-tool-carry small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:760px){.field-tool-carry-list{grid-template-columns:1fr}}
