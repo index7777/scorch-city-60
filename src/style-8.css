@@ -1,0 +1,15 @@
+/* v14.2.2 QA — itinerary recovery */
+.itinerary-recovery{margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);border-radius:10px}
+.recovery-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+.recovery-head span{font-size:.72rem;letter-spacing:.12em;opacity:.7}
+.recovery-stop-list{display:grid;gap:8px;margin:10px 0}
+.recovery-stop{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid rgba(255,255,255,.09);border-radius:8px}
+.recovery-stop>span{font-variant-numeric:tabular-nums;opacity:.7}
+.recovery-stop div{min-width:0}
+.recovery-stop b,.recovery-stop small{display:block}
+.recovery-stop small{margin-top:2px;opacity:.72;white-space:normal}
+.recovery-stop em{font-style:normal;font-size:.78rem;white-space:nowrap}
+.recovery-stop.can-keep{background:rgba(255,255,255,.025)}
+.recovery-stop.will-miss{border-style:dashed;background:rgba(255,255,255,.045)}
+.itinerary-recovery.overrun .recovery-stop.will-miss{box-shadow:inset 3px 0 0 rgba(255,255,255,.24)}
+@media(max-width:900px){.recovery-head{align-items:flex-start;flex-direction:column}.recovery-stop{grid-template-columns:24px minmax(0,1fr) auto}.recovery-stop button{grid-column:2/4;justify-self:start}}
