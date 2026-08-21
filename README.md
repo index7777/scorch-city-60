@@ -1,3 +1,14 @@
-# 灼城 60 / Scorched City 60
+# 《灼城 60》v14.2.2 QA Stabilization
 
-Vercel QA baseline for v14.2.2 stabilization.
+本版不新增玩法，專門修復目前 QA 阻塞：
+- 修復地圖因缺少道路情報 helper 導致的整體 render 中斷。
+- 修復探索節點「點了沒反應」：預設不再強制開啟路線規劃；直接點節點會開啟地點。
+- 保留顯式「路線規劃」模式，開啟後點節點才改變目的地。
+- 修正道路情報事件中未定義變數造成的潛在崩潰。
+- 統一 dialog 關閉事件與音效切換事件。
+- 加入 1599 / 1279 / 899 / 639 四級 responsive foundation，避免縮小時三欄硬擠與 modal 超出畫面。
+
+QA 目標：1920×1080、1366×768、1024×768、手機窄視窗。
+
+## GitHub / Vercel QA build
+為了先驗證互動與 responsive，本次 GitHub 基準版使用壓縮 QA 資產；完整 2K Master Scene 仍保留在本機封裝版，QA 通過後再回補正式資產。
