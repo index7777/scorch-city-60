@@ -28,8 +28,8 @@ function coolingTrainFactorV60(){
 const _centralGridBaseComponentsV60=centralGridBaseComponentsV34;
 centralGridBaseComponentsV34=function(){
  const c=_centralGridBaseComponentsV60();let solarKW=c.solarKW,generatorMaxKW=c.generatorMaxKW;
- if(c.generatorInstalled)generatorMaxKW*=installedAssetFactorV60('generator')||1;
- if(state.installed?.inverter&&solarKW>0)solarKW*=installedAssetFactorV60('inverter')||1;
+ if(c.generatorInstalled)generatorMaxKW*=installedAssetFactorV60('generator');
+ if(state.installed?.inverter&&solarKW>0)solarKW*=installedAssetFactorV60('inverter');
  return {...c,solarKW,generatorMaxKW,nonGeneratorKW:c.baseKW+solarKW}
 };
 
@@ -51,7 +51,7 @@ coreReqText=function(stage){const base=_coreReqTextV60(stage),assetIssues=critic
 
 function assetRepairCostV60(id,target=100,field=false){const q=assetConditionV60(id),gain=Math.max(0,target-q),a=assetDefs.find(x=>x.id===id),weight=a?.weight||200;const parts=Math.max(1,Math.ceil(gain/18+weight/650*(field?.6:1)));const hours=Math.max(.2,Math.round((gain/35+weight/900*(field?.35:.75))*20)/20);return {gain,parts,hours,target}}
 function fieldRepairAssetV60(id){
- const t=ensureFieldTeamV43(),c=ensureDynamicCargoV52();if(!t.active||!c.assets.includes(id))return toast('現場應急修復只能處理目前外勤車上的大型設備');const q=assetConditionV60(id);if(q>=ASSET_REPAIR_V60.fieldCap)return toast(`現場應急修復最多恢復到 ${ASSET_REPAIR_V60.fieldCap}%`);const r=assetRepairCostV60(id,ASSET_REPAIR_V60.fieldCap,true);if((state.resources.parts||0)<r.parts)return toast(`現場應急修復需要 ${r.parts} 零件`);state.resources.parts-=r.parts;if(!spendWorldTimeV26(r.hours,{label:`應急修復${assetDefs.find(a=>a.id===id)?.name||id}`})){state.resources.parts+=r.parts;return}const before=q,state.assets[id].condition=clamp(q+r.gain,0,r.target);state.assets[id].repairLog.push({day:state.day,type:'field',before,after:state.assets[id].condition,parts:r.parts,hours:r.hours});log(`${assetDefs.find(a=>a.id===id)?.name||id}完成現場應急修復：${before.toFixed(0)}% → ${state.assets[id].condition.toFixed(0)}%，消耗 ${r.parts} 零件。`,'good');render();saveGame(false)
+ const t=ensureFieldTeamV43(),c=ensureDynamicCargoV52();if(!t.active||!c.assets.includes(id))return toast('現場應急修復只能處理目前外勤車上的大型設備');const q=assetConditionV60(id);if(q>=ASSET_REPAIR_V60.fieldCap)return toast(`現場應急修復最多恢復到 ${ASSET_REPAIR_V60.fieldCap}%`);const r=assetRepairCostV60(id,ASSET_REPAIR_V60.fieldCap,true);if((state.resources.parts||0)<r.parts)return toast(`現場應急修復需要 ${r.parts} 零件`);state.resources.parts-=r.parts;if(!spendWorldTimeV26(r.hours,{label:`應急修復${assetDefs.find(a=>a.id===id)?.name||id}`})){state.resources.parts+=r.parts;return}const before=q;state.assets[id].condition=clamp(q+r.gain,0,r.target);state.assets[id].repairLog.push({day:state.day,type:'field',before,after:state.assets[id].condition,parts:r.parts,hours:r.hours});log(`${assetDefs.find(a=>a.id===id)?.name||id}完成現場應急修復：${before.toFixed(0)}% → ${state.assets[id].condition.toFixed(0)}%，消耗 ${r.parts} 零件。`,'good');render();saveGame(false)
 }
 function stationRepairAssetV60(id){
  const t=ensureFieldTeamV43(),st=state.assets?.[id];if(t.active)return toast('外勤隊尚未返站，不能進行中央站正式整修');if(!st?.transported)return toast('大型設備必須先運回中央站');const q=assetConditionV60(id);if(q>=99.5)return toast('設備目前不需要正式整修');const r=assetRepairCostV60(id,ASSET_REPAIR_V60.stationTarget,false);if((state.resources.parts||0)<r.parts)return toast(`正式整修需要 ${r.parts} 零件`);state.resources.parts-=r.parts;if(!spendWorldTimeV26(r.hours,{label:`正式整修${assetDefs.find(a=>a.id===id)?.name||id}`})){state.resources.parts+=r.parts;return}const before=q;st.condition=100;st.repairLog.push({day:state.day,type:'station',before,after:100,parts:r.parts,hours:r.hours});log(`${assetDefs.find(a=>a.id===id)?.name||id}完成中央站正式整修：${before.toFixed(0)}% → 100%，消耗 ${r.parts} 零件。`,'good');render();saveGame(false)
