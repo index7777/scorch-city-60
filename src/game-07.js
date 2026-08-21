@@ -16,7 +16,7 @@ function renderMap(){
  const nodes=locations.map(l=>{
   const rem=Object.values(state.locations[l.id].remaining).reduce((a,b)=>a+(typeof b==='number'?b:0),0),ratio=resourceRatio(l.id);
   let cls=l.base?'base':isSafeSearch(l)?'safe':'danger';sceneVisualStates(l.id).forEach(s=>cls+=' state-'+s);if(state.coldStations.includes(l.id))cls+=' cold';if(state.intel[l.id]&&!state.locations[l.id].searched)cls+=' rumor';if(isOccupiedMap(l.id))cls+=' map-occupied';if(isEvacuatedMap(l.id))cls+=' map-evacuated';if(ratio<.2)cls+=' map-depleted';else if(ratio<.5)cls+=' map-thinning';if(!mapFilterPass(l.id))cls+=' map-filtered';if(state.mapPlanner?.active&&state.mapPlanner.target===l.id)cls+=' route-target';
-  const npc=Object.values(state.npcs).find(n=>n.alive&&n.location===l.id),pop=districtPopulationAt(l.id);
+  const npc=Object.values(state.npcs).find(n=>n.alive&&n.location===l.id&&npcKnown(n)),pop=districtPopulationAt(l.id);
   let detail=state.locations[l.id].searched?(rem?`已確認剩餘：約 ${Math.floor(rem)}`:'已確認物資稀少'):(state.intel[l.id]?`情報：${state.intel[l.id].summary}`:'尚未掌握庫存');
   const history=districtHistoryTags(l.id).slice(0,1)[0],assets=discoveredAssetsAt(l.id),notes=notesAt(l.id);
   return `<button class="node ${cls} ${rem===0&&!l.special?'cleared':''}" data-id="${l.id}" style="left:${l.x}%;top:${l.y}%;transform:translate(-50%,-50%);--loot:${ratio.toFixed(2)}"><span class="node-art" style="background-image:url('${locationThumbArt(l.id)}')"></span><span class="node-copy"><b>${l.name}</b><small>${detail}</small>${pop?`<small class="world-pop">◉ ${pop} 人活動</small>`:''}${npc?`<small class="npc-pin">● ${npc.name} · ${npc.role}</small>`:''}${state.coldStations.includes(l.id)?'<small class="npc-pin">❄ 冷站運作中</small>':''}${assets.length?`<small class="asset-pin">◆ 大型資產 ${assets.length}</small>`:''}${history?`<small class="history-pin">▣ ${history}</small>`:''}${notes.length?`<small class="note-pin">✎ ${notes.length} 個標記</small>`:''}</span></button>`
@@ -29,7 +29,7 @@ function renderMap(){
 
 function renderPersonnel(){
  if(!$('personnelStrip'))return;
- const order=['chen','lin','wu','mei'];
+ const order=['chen','lin','wu','mei'].filter(id=>npcKnown(state.npcs[id]));
  $('personnelStrip').innerHTML=order.map(id=>{
    const n=state.npcs[id],loc=locations.find(l=>l.id===n.location)?.name||'未知';
    const trust=n.trust>=6?'可靠':n.trust>=2?'合作':n.trust<=-4?'戒備':'中立';
