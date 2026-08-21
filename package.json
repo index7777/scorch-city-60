@@ -1,0 +1,1 @@
+{"private":true,"scripts":{"build":"rm -rf public && mkdir public && tar -xzf site-qa.tar.gz -C public"}}
