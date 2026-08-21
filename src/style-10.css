@@ -1,0 +1,14 @@
+/* v14.2.2 QA — cooling vehicle / mobile power */
+.vehicle-route-check,.vehicle-power-panel{border:1px solid var(--line,#3b4248);background:rgba(16,20,22,.86);padding:12px;margin-top:12px;border-radius:10px}
+.vehicle-route-check.ok{border-color:rgba(120,160,130,.5)}
+.vehicle-route-check.bad{border-color:rgba(190,110,90,.65)}
+.vehicle-route-check h3,.vehicle-power-panel h3{margin:0 0 8px;font-size:clamp(.92rem,1vw,1.05rem)}
+.vehicle-route-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vehicle-route-grid>span{display:flex;flex-direction:column;gap:3px;min-width:0;padding:8px;background:rgba(255,255,255,.035);border-radius:7px;font-size:.78rem}
+.vehicle-route-grid b{font-size:.9rem;overflow-wrap:anywhere}
+.vehicle-power-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.vehicle-power-head span{font-size:.68rem;letter-spacing:.12em;opacity:.66}
+.vehicle-power-panel .equipment-actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
+.vehicle-power-panel .equipment-actions .active{outline:1px solid currentColor}
+@media (max-width:1280px){.vehicle-route-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.vehicle-route-grid{grid-template-columns:1fr}.vehicle-power-head{flex-direction:column}.vehicle-power-panel .equipment-actions>*{flex:1 1 140px}}
