@@ -37,9 +37,9 @@ function diagnoseAssetV63(id,depth='basic'){
  const fs=ensureDiagnosticEvidenceV63(id),active=activeAssetFaultsV62(id),toolSet=new Set(plan.tools);let confirmed=0;
  for(const f of active){
   const req=FAULT_MEASUREMENTS_V63[f.id]||[],matched=req.filter(x=>toolSet.has(x)).length,coverage=req.length?matched/req.length:1,old=faultEvidenceV63(id,f.id);
-  let gain=.20+(plan.deep?.16:0)+(plan.chen?.16:0)+coverage*.34;
+  let gain=.20+(plan.deep ? .16 : 0)+(plan.chen ? .16 : 0)+coverage*.34;
   if(req.length&&!matched)gain-=.10;
-  const evidenceCap=req.length?(coverage<=0?(plan.chen?.76:.72):coverage<1?(plan.chen?.90:.86):.97):.97;
+  const evidenceCap=req.length?(coverage<=0?(plan.chen ? .76 : .72):coverage<1?(plan.chen ? .90 : .86):.97):.97;
   const confidence=clamp(Math.min(evidenceCap,Math.max(old.confidence,0)+gain),0,.97),spread=Math.max(6,42-confidence*34),center=f.severity;
   fs.evidence[f.id]={confidence,severityMin:clamp(center-spread,0,100),severityMax:clamp(center+spread,0,100),runs:(old.runs||0)+1,tools:[...new Set([...(old.tools||[]),...plan.tools])],lastDay:state.day};
   if(confidence>=.78){if(!fs.diagnosed.includes(f.id))fs.diagnosed.push(f.id);confirmed++}
