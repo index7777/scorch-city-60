@@ -55,6 +55,7 @@ jobs:
           node --check qa/resident-physical-water-backpack-smoke.mjs
           node --check qa/resident-finite-stock-smoke.mjs
           node --check qa/resident-heat-limit-smoke.mjs
+          node --check qa/resident-no-meta-copy-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -122,3 +123,4 @@ jobs:
           timeout 90s node qa/resident-physical-water-backpack-smoke.mjs
           timeout 90s node qa/resident-finite-stock-smoke.mjs
           timeout 90s node qa/resident-heat-limit-smoke.mjs
+          timeout 90s node qa/resident-no-meta-copy-smoke.mjs
