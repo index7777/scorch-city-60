@@ -98,6 +98,20 @@
   applyQuickSearchBlocker(loc);
  };
 
+ // Planner must obey the same knowledge boundary as the map. Unknown targets cannot expose heat,
+ // cold coverage, asset counts, route intelligence, true names, or other world-state facts.
+ const scoutOriginalMapPlannerHtml=mapPlannerHtml;
+ mapPlannerHtml=function(){
+  ensureScoutState();
+  const id=state.mapPlanner?.target;
+  if(id&&id!=='base'&&!isScouted(id)){
+   const loc=mapLoc(id);
+   const direction=typeof directionFromBaseV68==='function'?directionFromBaseV68(id):'方位未確認';
+   return `<div class="planner-head"><div><span>MAP ROUTE</span><b>? 未知區域</b></div><button id="closePlanner" class="mini">${state.mapPlanner?.active?'收合':'展開'}</button></div>${state.mapPlanner?.active?`<div class="resident-unknown-note"><b>尚未偵察</b><p>${direction}。目前只知道這裡有可抵達的城市節點；熱負荷、人口、資源、大型物件、冷卻狀態與人物資訊都未知。</p></div><div class="planner-actions"><button id="plannerLocation">安排偵察</button></div>`:'<p class="muted">展開後可選擇未知區域並安排偵察。</p>'}`;
+  }
+  return scoutOriginalMapPlannerHtml();
+ };
+
  const scoutOriginalRenderMap=renderMap;
  renderMap=function(){
   ensureScoutState();
@@ -106,10 +120,16 @@
    const id=node.dataset.id;if(!id||id==='base'||isScouted(id))return;
    const copy=node.querySelector('.node-copy');if(copy){copy.innerHTML='<b>? 未知區域</b><small>尚未偵察</small><small>點擊後只能安排偵察</small>'}
    const art=node.querySelector('.node-art');if(art){art.style.backgroundImage='none';art.textContent='?';art.classList.add('resident-unknown-art')}
-   node.classList.remove('rumor','map-occupied','map-evacuated','map-depleted','map-thinning','cold');
+   // Remove every presentation channel derived from hidden world truth, not only visible text.
+   node.classList.remove('rumor','map-occupied','map-evacuated','map-depleted','map-thinning','cold','safe','danger','cleared');
+   Array.from(node.classList).filter(c=>c.startsWith('state-')).forEach(c=>node.classList.remove(c));
+   node.style.removeProperty('--loot');
    node.classList.add('resident-unknown-node','fog-unknown-v68');
+   node.removeAttribute('title');
+   node.setAttribute('aria-label','未知區域，尚未偵察');
   });
   document.querySelector('.world-map-summary')?.classList.add('resident-hidden');
+  // Settlement population glows are world truth. Never render them as player knowledge.
   document.querySelectorAll('.settlement-glow').forEach(el=>el.classList.add('resident-hidden'));
   document.querySelectorAll('.node').forEach(n=>n.onclick=()=>{
    if(state.mapPlanner?.active){state.mapPlanner.target=n.dataset.id;renderMap()}
