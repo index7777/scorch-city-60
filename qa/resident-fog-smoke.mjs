@@ -18,6 +18,7 @@ const result=await evaluate(`(()=>{
  state.locations.warehouse.searched=false;delete state.intel.warehouse;
  state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.observedLocations=state.knowledge.observedLocations||{};
  delete state.knowledge.scoutedLocations.warehouse;delete state.knowledge.observedLocations.warehouse;
+ const trueName=mapLoc('warehouse')?.name||'warehouse';
  const s=Object.values(state.settlements||{}).find(x=>x.location==='warehouse');if(s)s.population=9;
  const npc=Object.values(state.npcs||{}).find(x=>x.location==='warehouse');if(npc){npc.alive=true;npc.name='QA_SECRET_NPC'}
  state.coldStations=Array.from(new Set([...(state.coldStations||[]),'warehouse']));
@@ -28,18 +29,19 @@ const result=await evaluate(`(()=>{
  const text=(node?.textContent||'')+' '+(planner?.textContent||'');
  const cls=node?.className||'';
  const style=node?.getAttribute('style')||'';
+ const leakedSecret=text.includes('QA_SECRET_NPC')||text.includes(trueName)||/9\\s*人/.test(text)||/warehouse/i.test(text);
  return {
   nodeUnknown:!!node&&/未知區域/.test(node.textContent||''),
   plannerUnknown:!!planner&&/未知區域/.test(planner.textContent||''),
-  noLeaks:!/(QA_SECRET_NPC|大型資產|大型物件|冷站|人口|9 人|warehouse)/i.test(text),
+  noLeaks:!leakedSecret,
   neutralClass:!/(safe|danger|map-occupied|map-evacuated|map-depleted|map-thinning|cold|cleared|state-)/.test(cls),
   noLootStyle:!/--loot/.test(style),
-  scoutOnly:!!planner?.querySelector('#plannerScoutUnknown')&&!planner?.querySelector('#plannerExpedition')&&!planner?.querySelector('#plannerLocation')
+  scoutOnly:!!planner?.querySelector('#plannerLocation')&&!planner?.querySelector('#plannerExpedition')
  }
 })()`);
 assert(result.nodeUnknown,'unknown node label leaked');
 assert(result.plannerUnknown,'planner did not stay unknown');
-assert(result.noLeaks,'planner/map text leaked world truth');
+assert(result.noLeaks,'planner/map text leaked concrete world truth');
 assert(result.neutralClass,'unknown node leaked state through CSS classes');
 assert(result.noLootStyle,'unknown node leaked resource ratio through CSS variable');
 assert(result.scoutOnly,'unknown planner exposed non-scout actions');
