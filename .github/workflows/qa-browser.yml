@@ -42,6 +42,7 @@ jobs:
           node --check qa/resident-electricity-shelter-budget-smoke.mjs
           node --check qa/resident-transport-profile-smoke.mjs
           node --check qa/resident-expedition-transport-smoke.mjs
+          node --check qa/resident-large-haul-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -96,3 +97,4 @@ jobs:
           timeout 90s node qa/resident-electricity-shelter-budget-smoke.mjs
           timeout 90s node qa/resident-transport-profile-smoke.mjs
           timeout 90s node qa/resident-expedition-transport-smoke.mjs
+          timeout 90s node qa/resident-large-haul-smoke.mjs
