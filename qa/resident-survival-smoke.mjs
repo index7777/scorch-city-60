@@ -16,13 +16,13 @@ await waitFor(()=>evaluate(`typeof qaStateV84==='function' && typeof applyReside
 const result=await evaluate(`(()=>{
  const reset=()=>{window.state=qaStateV84();state.day=30;state.phase='day';state.hoursLeft=8;state.player={hydration:100,satiety:100,stamina:100,health:100,bodyTemp:36.5,heat:0};state.residentSurvivalClock={day:30,phase:'day',hoursLeft:8};};
  reset();applyResidentSurvivalHoursV94(2,{outside:true,ambientTemp:100,coolingPack:false,vehicleAc:false});const hot={temp:state.player.bodyTemp,heat:state.player.heat,hydration:state.player.hydration};
- reset();applyResidentSurvivalHoursV94(2,{outside:true,ambientTemp:100,coolingPack:true,vehicleAc:false});const cooled={temp:state.player.bodyTemp,heat:state.player.heat};
+ reset();state.gear.coolingPack=true;if(typeof ensurePowerStateV24==='function')ensurePowerStateV24();applyResidentSurvivalHoursV94(2,{outside:true,ambientTemp:100,coolingPack:true,vehicleAc:false});const cooled={temp:state.player.bodyTemp,heat:state.player.heat};
  reset();state.player.bodyTemp=40;state.player.heat=80;applyResidentSurvivalHoursV94(2,{shelter:true,outside:false});const shelter={temp:state.player.bodyTemp,heat:state.player.heat};
  reset();state.player.bodyTemp=42.2;residentDeathCheckV94();const death={dead:state.player.dead,reason:state.player.deathReason};
  return {hot,cooled,shelter,death};
 })()`);
 assert(result.hot.temp>36.5&&result.hot.heat>0&&result.hot.hydration<100,'100C field exposure did not increase heat/body temperature or hydration cost');
-assert(result.cooled.temp<result.hot.temp&&result.cooled.heat<result.hot.heat,'cooling pack did not reduce heat load');
+assert(result.cooled.temp<result.hot.temp&&result.cooled.heat<result.hot.heat,'powered cooling pack did not reduce heat load');
 assert(result.shelter.temp<40&&result.shelter.heat<80,'shelter did not recover heat/body temperature');
 assert(result.death.dead&&result.death.reason==='致命高體溫','fatal body-temperature threshold did not produce explicit death cause');
 console.log('PASS resident survival core regression');
