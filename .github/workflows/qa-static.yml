@@ -20,16 +20,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: JavaScript syntax check
+      - name: JavaScript entry and QA syntax check
         shell: bash
         run: |
           set -euo pipefail
           node --check game.js
-          for file in src/game-*.js; do
-            echo "checking $file"
-            node --check "$file"
-          done
           node --check qa/regression-invariants.mjs
+          node --check qa/browser-smoke.mjs
 
       - name: Loader-equivalent concatenated syntax check
         shell: bash
@@ -48,6 +45,20 @@ jobs:
           console.log(`Built loader-equivalent source from ${files.length} modules`);
           NODE
           node --check /tmp/scorch-city-combined.js
+
+      - name: Split-module syntax diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+          for file in src/game-*.js; do
+            if ! node --check "$file" >/tmp/module-check.log 2>&1; then
+              echo "::warning file=$file::Module is not standalone-parseable; loader-equivalent concatenated syntax remains authoritative."
+              cat /tmp/module-check.log
+              failed=$((failed+1))
+            fi
+          done
+          echo "Standalone module diagnostics: $failed warning(s)"
 
       - name: Loader and stylesheet consistency
         shell: bash

@@ -49,6 +49,25 @@ expect('X23 one-step daily recovery', /f\.display=Math\.max\(raw,f\.display-1\)/
 // X24 — Day 1–3 visibly expose at least a precursor.
 expect('X24 early pressure precursor', hasAll('城市短波出現供水前兆','state.day<=3'));
 
+// X27 — every direct NPC social session spends world time.
+expect('X27 NPC contact time', hasAll("spendSocialTimeV79(.5,'NPC 接觸')","spendSocialTimeV79(.5,'NPC 交涉')"));
+expect('X27 settlement negotiation time', hasAll("spendSocialTimeV79(.5,'聚落交易交涉')"));
+
+// X28 — visible 0–100 relationship meter exposes actual unlock thresholds.
+expect('X28 visible relation meter', hasAll('好感度 ${s}/100','relation-track-v79'));
+expect('X28 actual unlock thresholds', hasAll("{score:55,label:'情報交換'","{score:65,label:'擴充交易條件'","{score:85,label:'精確庫存'"));
+
+// X29 — high-risk searches have four physical consequence classes.
+expect('X29 high-risk consequence classes', hasAll('裝備損壞','受傷','時間超支','搶走外放補給'));
+expect('X29 injury blocks field deployment', hasAll('highRiskInjuredV84','fieldTeamNpcEligibleV43=function(id)','不可再次出勤'));
+
+// X30 — contacted settlements expose a direct bilateral trade entry.
+expect('X30 settlement trade entry', hasAll('發起交易 · 0.5h','openSettlementTradeV79','聚落庫存是實體有限庫存'));
+
+// X31/X32 — canonical visible naming.
+expect('X31 research naming unified', hasAll("['researchDialog','研究']","research.textContent='研究'"));
+expect('X32 large asset naming unified', hasAll("replace(/大型設備/g,'大型資產')","城市物流 · 大型資產"));
+
 // B9–B11 — one canonical risk vocabulary/source.
 expect('B9-B11 canonical risk bands', hasAll('riskBandV73','平靜','警戒','緊張','危險','崩潰'));
 expect('B11 brief uses canonical riskLabel', /整體風險：\$\{riskLabel\(\)\}/.test(src));
