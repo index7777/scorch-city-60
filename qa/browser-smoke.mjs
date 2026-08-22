@@ -28,7 +28,7 @@ await test('B6 unknown node is fogged and only scout action is exposed',async()=
 });
 
 await test('B3 insufficient-time quick search is visibly disabled',async()=>{
- const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=.25;state.locations.store.searched=false;state.intel.store={day:1,verifiedDay:1,summary:'已確認地點用途',source:'QA',confidence:100};const r=searchRecordV69('store');r.lastSearchDay=0;r.visits=0;openLocation('store');const b=document.getElementById('searchLoc'),note=document.querySelector('.quick-search-time-v71');const good=!!b&&b.disabled&&/需/.test(b.textContent)&&!!note;document.getElementById('locationDialog')?.close();return good})()`);
+ const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=.25;state.locations.store.searched=false;state.intel.store={day:1,verifiedDay:1,summary:'已確認地點用途',source:'QA',confidence:100};state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.observedLocations=state.knowledge.observedLocations||{};state.knowledge.scoutedLocations.store={day:1,method:'QA'};state.knowledge.observedLocations.store={day:1,method:'QA'};const r=searchRecordV69('store');r.lastSearchDay=0;r.visits=0;openLocation('store');const b=document.getElementById('searchLoc'),note=document.querySelector('.quick-search-time-v71');const good=!!b&&b.disabled&&/需/.test(b.textContent)&&!!note;document.getElementById('locationDialog')?.close();return good})()`);
  assert(ok,'quick search remained actionable without enough time');
 });
 
@@ -92,7 +92,7 @@ await test('X29 high-risk injury and time-overrun mutate real state',async()=>{
 });
 
 await test('X30 contacted settlement exposes enabled trade entry',async()=>{
- const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();const id=Object.keys(state.settlements||{})[0];if(!id)return false;const s=state.settlements[id];state.locations[s.location].searched=true;openSettlements();const b=document.querySelector('[data-settlement-trade-v79="'+id+'"]');const good=!!b&&!b.disabled&&/發起交易/.test(b.textContent);document.getElementById('settlementDialog')?.close();return good})()`);
+ const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();const id=Object.keys(state.settlements||{})[0];if(!id)return false;const s=state.settlements[id];state.locations[s.location].searched=true;state.knowledge=state.knowledge||{};state.knowledge.contacts=Array.isArray(state.knowledge.contacts)?state.knowledge.contacts:[];const npcEntry=Object.entries(state.npcs||{}).find(([,n])=>n&&n.alive&&n.location===s.location);if(!npcEntry)return false;const [npcId]=npcEntry;if(!state.knowledge.contacts.includes(npcId))state.knowledge.contacts.push(npcId);openSettlements();const b=document.querySelector('[data-settlement-trade-v79="'+id+'"]');const good=!!b&&!b.disabled&&/發起交易/.test(b.textContent);document.getElementById('settlementDialog')?.close();return good})()`);
  assert(ok,'contacted settlement did not expose trade entry');
 });
 
