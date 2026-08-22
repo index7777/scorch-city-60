@@ -24,6 +24,7 @@ const result=await evaluate(`(()=>{
  const bottom=[...document.querySelectorAll('.bottom-strip>div')];
  const tutorial=document.getElementById('tutorialDialog');
  const tutorialText=tutorial?.textContent||'';
+ const forbiddenTutorial=['修復城市','中央安全區','冷源核心','0/10','10 階','10階','主線'];
  const hud=document.getElementById('residentHud');
  const hudText=hud?.textContent||'';
  const cityTransformationVisible=[...document.querySelectorAll('button,.card,.summary-card')].some(el=>(el.textContent||'').includes('城市轉化')&&!el.classList.contains('resident-hidden')&&getComputedStyle(el).display!=='none');
@@ -42,7 +43,7 @@ const result=await evaluate(`(()=>{
  }
  return {
   coreHidden:!!coreBtn&&coreBtn.classList.contains('resident-locked')&&!!bottom[2]?.classList.contains('resident-hidden'),
-  tutorialClean:/耐熱屋/.test(tutorialText)&&/Day 30/.test(tutorialText)&&/100°C/.test(tutorialText)&&!/修復城市|中央安全區|冷源核心|0\/10|10\s*階|主線/.test(tutorialText),
+  tutorialClean:tutorialText.includes('耐熱屋')&&tutorialText.includes('Day 30')&&tutorialText.includes('100°C')&&!forbiddenTutorial.some(x=>tutorialText.includes(x)),
   playerHud:!!hud&&['水分','飽足','體力','健康','體溫'].every(x=>hudText.includes(x)),
   noCityTransformation:!cityTransformationVisible,
   settlementHidden,
