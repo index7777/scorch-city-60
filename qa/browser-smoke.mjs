@@ -20,7 +20,7 @@ await send('Runtime.enable');await send('Page.enable');
 await waitFor(()=>evaluate(`document.readyState==='complete' && document.getElementById('demoEntryStatus')?.textContent.includes('Demo 已就緒')`),30000);
 await evaluate(`document.getElementById('demoStart').click()`);
 await waitFor(()=>evaluate(`window.__SCORCH_ENTRY_ACTIVE===false`));
-await evaluate(`for(const d of document.querySelectorAll('dialog[open]'))d.close();state.onboarding.enabled=false;state.onboarding.completed=true;render();`);
+await evaluate(`window.state=qaStateV84();for(const d of document.querySelectorAll('dialog[open]'))d.close();state.onboarding.enabled=false;state.onboarding.completed=true;render();`);
 
 await test('B6 unknown node is fogged and only scout action is exposed',async()=>{
  const ok=await evaluate(`(()=>{state.locations.warehouse.searched=false;delete state.intel.warehouse;renderMap();const n=document.querySelector('.node[data-id="warehouse"]');if(!n||!n.classList.contains('fog-unknown-v68')||!n.textContent.includes('? 未知區域'))return false;openLocation('warehouse');const dlg=document.getElementById('locationDialog');const good=!!document.getElementById('scoutUnknownV68')&&!document.getElementById('searchLoc')&&!document.getElementById('tradeLoc')&&!document.getElementById('openCraftFromLoc');dlg.close();return good})()`);
