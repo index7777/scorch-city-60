@@ -49,6 +49,7 @@ jobs:
           node --check qa/resident-longpath-smoke.mjs
           node --check qa/resident-save-migration-smoke.mjs
           node --check qa/resident-info-consistency-smoke.mjs
+          node --check qa/resident-opening-hard-fog-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -110,3 +111,4 @@ jobs:
           timeout 90s node qa/resident-longpath-smoke.mjs
           timeout 90s node qa/resident-save-migration-smoke.mjs
           timeout 90s node qa/resident-info-consistency-smoke.mjs
+          timeout 90s node qa/resident-opening-hard-fog-smoke.mjs
