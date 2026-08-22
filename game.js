@@ -1,5 +1,6 @@
 (()=>{
  window.__SCORCH_ENTRY_ACTIVE=true;
+ window.__SCORCH_BOOT_ERROR='';
  const SAVE_KEYS=['scorch60_save_v14_2_2','scorch60_save_v14_2_1','scorch60_save_v14_2','scorch60_save_v14_1','scorch60_save_v14_0','scorch60_save_v13_9','scorch60_save_v13_8','scorch60_save_v13_7','scorch60_save_v13_6','scorch60_save_v13_5','scorch60_save_v13_4','scorch60_save_v13_3','scorch60_save_v13_2','scorch60_save_v13_1','scorch60_save_v13','scorch60_save_v12','scorch60_save_v11','scorch60_save_v10','scorch60_save_v9','scorch60_save_v8','scorch60_save_v7','scorch60_save_v6','scorch60_save_v5','scorch60_save_v4','scorch60_save_v3'];
  const hasValidSave=()=>SAVE_KEYS.some(key=>{try{const raw=localStorage.getItem(key);if(!raw)return false;const data=JSON.parse(raw);return !!data&&typeof data==='object'&&Number.isFinite(Number(data.day))}catch{return false}});
  const entry=document.createElement('section');
@@ -37,5 +38,5 @@
    const load=document.getElementById('loadBtn');if(load)load.click();
    setTimeout(()=>{tutorialGate=false},250);
   };
- }).catch(err=>{console.error(err);$e('demoEntryStatus').textContent='遊戲程式載入失敗，請重新整理。';const t=document.getElementById('toast');if(t){t.textContent='遊戲程式載入失敗，請重新整理。';t.classList.add('show')}})
+ }).catch(err=>{window.__SCORCH_BOOT_ERROR=String(err?.stack||err);console.error(err);$e('demoEntryStatus').textContent='遊戲程式載入失敗，請重新整理。';const t=document.getElementById('toast');if(t){t.textContent='遊戲程式載入失敗，請重新整理。';t.classList.add('show')}})
 })();
