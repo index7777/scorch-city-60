@@ -11,7 +11,11 @@
   };
  }
  function successfulQuickSearchV95(loc,fromLogIndex){
-  return (state.log||[]).slice(fromLogIndex).some(e=>String(e?.msg||'').startsWith(`${loc.name} 搜索：`));
+  const name=String(loc?.name||'');
+  return (state.log||[]).slice(fromLogIndex).some(e=>{
+   const msg=String(e?.msg||'');
+   return msg.startsWith(`${name}快速搜索：`)||msg.startsWith(`${name} 搜索：`);
+  });
  }
  function applyEndlessFieldExposureV95(hours){
   if(typeof applyResidentSurvivalHoursV94!=='function')return;
@@ -26,7 +30,7 @@
  const originalSearchLocationV95=searchLocation;
  searchLocation=function(loc){
   const beforeDay=state.day,beforeHours=Number(state.hoursLeft),beforeLog=(state.log||[]).length;
-  const estimatedHours=typeof timeCostFor==='function'?Math.max(0,Number(timeCostFor(loc))||0):0;
+  const estimatedHours=typeof quickSearchTimeV69==='function'?Math.max(0,Number(quickSearchTimeV69(loc))||0):(typeof timeCostFor==='function'?Math.max(0,Number(timeCostFor(loc))||0):0);
   const restore=markFieldActiveV95(true);
   let out;
   try{out=originalSearchLocationV95(loc)}finally{restore()}
