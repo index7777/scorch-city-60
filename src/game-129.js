@@ -6,7 +6,13 @@
   'npc-cai-yuren':{name:'蔡育仁',role:'學校工友',skill:'access',home:'school',route:['school','hardware','homes'],priority:'確認建物與鑰匙'},
   'npc-deng-huiwen':{name:'鄧慧雯',role:'辦公室職員',skill:'search',home:'homes',route:['homes','store','school'],priority:'找家人'},
   'npc-ma-junhao':{name:'馬俊豪',role:'倉庫理貨員',skill:'handling',home:'warehouse',route:['warehouse','hardware','industrial'],priority:'確認可搬運物資'},
-  'npc-fang-lili':{name:'方莉莉',role:'廚師',skill:'food',home:'homes',route:['homes','store','warehouse'],priority:'保存能吃的食物'}
+  'npc-fang-lili':{name:'方莉莉',role:'廚師',skill:'food',home:'homes',route:['homes','store','warehouse'],priority:'保存能吃的食物'},
+  'npc-su-weiting':{name:'蘇偉庭',role:'保全',skill:'security',home:'warehouse',route:['warehouse','school','store'],priority:'確認出入口安全'},
+  'npc-qiu-meiling':{name:'邱美玲',role:'退休教師',skill:'community-memory',home:'homes',route:['homes','school','store'],priority:'確認鄰里還有誰需要幫忙'},
+  'npc-peng-yucheng':{name:'彭昱成',role:'單車快遞員',skill:'scouting',home:'store',route:['store','homes','warehouse'],priority:'確認可通行的近路'},
+  'npc-ye-shuhan':{name:'葉書涵',role:'實驗室技術員',skill:'instrument',home:'research',route:['research','clinic','industrial'],priority:'保住能讀取的儀器與紀錄'},
+  'npc-jiang-tao':{name:'江濤',role:'營造工人',skill:'construction',home:'hardware',route:['hardware','industrial','warehouse'],priority:'確認能清開或加固的地方'},
+  'npc-tang-yun':{name:'唐芸',role:'無線電愛好者',skill:'radio',home:'homes',route:['homes','fire','school'],priority:'找可用的通訊器材'}
  };
  const TOPICS_V129=[
   ['status','現在狀況'],['work','你的工作'],['place','這裡'],['needs','目前需要'],['plan','接下來打算'],['supplies','手上的物資'],['recent','最近遇到什麼'],['trust','怎麼合作']
