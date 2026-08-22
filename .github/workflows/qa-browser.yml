@@ -65,6 +65,7 @@ jobs:
           node --check qa/resident-local-events-smoke.mjs
           node --check qa/resident-barter-station-smoke.mjs
           node --check qa/resident-community-requests-smoke.mjs
+          node --check qa/resident-recurring-npc-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -142,3 +143,4 @@ jobs:
           timeout 90s node qa/resident-local-events-smoke.mjs
           timeout 90s node qa/resident-barter-station-smoke.mjs
           timeout 90s node qa/resident-community-requests-smoke.mjs
+          timeout 90s node qa/resident-recurring-npc-smoke.mjs
