@@ -19,10 +19,14 @@
   const p=typeof socialNpcV122==='function'?socialNpcV122(id,s):null;
   return !!(p&&Array.isArray(p.talked)&&p.talked.includes(`${id}-t04`));
  }
+ function canHandleCommunityRequestV128(id,s=state){
+  const n=typeof npcV121==='function'?npcV121(id,s):null;if(!n||!n.alive||!n.encountered)return false;
+  const here=typeof ensureExplorationV113==='function'?ensureExplorationV113(s).current:'base';
+  return n.location===here&&s.explorationV118?.observed?.[here]===true;
+ }
  function visibleCommunityRequestV128(id,s=state){
   const def=COMMUNITY_REQUESTS_V128[id],c=ensureCommunityV128(s);if(!def||c.completed[id])return null;
-  if(!requestKnownV128(id,s))return null;
-  if(typeof canSocializeV122!=='function'||!canSocializeV122(id,s))return null;
+  if(!requestKnownV128(id,s)||!canHandleCommunityRequestV128(id,s))return null;
   return {id,...def};
  }
  function findBackpackItemV128(itemId,s=state){
@@ -54,5 +58,5 @@
  const prevMakeStateV128=makeState;makeState=function(){const s=prevMakeStateV128();ensureCommunityV128(s);return s};ensureCommunityV128(state);
  const prevRenderMapV128=renderMap;renderMap=function(){const out=prevRenderMapV128();installCommunityStylesV128();queueMicrotask(renderCommunityRequestsV128);return out};
  const prevRenderV128=render;render=function(){const out=prevRenderV128();installCommunityStylesV128();queueMicrotask(renderCommunityRequestsV128);return out};
- installCommunityStylesV128();window.COMMUNITY_REQUESTS_V128=COMMUNITY_REQUESTS_V128;window.ensureCommunityV128=ensureCommunityV128;window.requestKnownV128=requestKnownV128;window.visibleCommunityRequestV128=visibleCommunityRequestV128;window.contributeCommunityRequestV128=contributeCommunityRequestV128;window.renderCommunityRequestsV128=renderCommunityRequestsV128;
+ installCommunityStylesV128();window.COMMUNITY_REQUESTS_V128=COMMUNITY_REQUESTS_V128;window.ensureCommunityV128=ensureCommunityV128;window.requestKnownV128=requestKnownV128;window.canHandleCommunityRequestV128=canHandleCommunityRequestV128;window.visibleCommunityRequestV128=visibleCommunityRequestV128;window.contributeCommunityRequestV128=contributeCommunityRequestV128;window.renderCommunityRequestsV128=renderCommunityRequestsV128;
 })();
