@@ -59,6 +59,7 @@ jobs:
           node --check qa/resident-items-scene-smoke.mjs
           node --check qa/resident-scene-physical-smoke.mjs
           node --check qa/resident-npc-core-smoke.mjs
+          node --check qa/resident-social-dialogue-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -130,3 +131,4 @@ jobs:
           timeout 90s node qa/resident-items-scene-smoke.mjs
           timeout 90s node qa/resident-scene-physical-smoke.mjs
           timeout 90s node qa/resident-npc-core-smoke.mjs
+          timeout 90s node qa/resident-social-dialogue-smoke.mjs
