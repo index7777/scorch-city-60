@@ -21,7 +21,9 @@ jobs:
           node-version: '22'
 
       - name: Browser smoke syntax check
-        run: node --check qa/browser-smoke.mjs
+        run: |
+          node --check qa/browser-smoke.mjs
+          node --check qa/resident-fog-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -60,3 +62,4 @@ jobs:
           fi
 
           node qa/browser-smoke.mjs
+          node qa/resident-fog-smoke.mjs
