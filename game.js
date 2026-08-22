@@ -9,9 +9,8 @@
  document.body.prepend(entry);
  const $e=id=>document.getElementById(id),hideEntry=()=>{entry.hidden=true;document.body.classList.add('demo-entered')};
  const togglePanel=id=>{for(const panel of entry.querySelectorAll('.demo-entry__panel'))panel.classList.toggle('active',panel.id===id&&!panel.classList.contains('active'))};
- $e('demoHowTo').onclick=()=>togglePanel('demoHowToPanel');
- $e('demoSettings').onclick=()=>togglePanel('demoSettingsPanel');
- const files=Array.from({length:103},(_,i)=>`src/game-${String(i).padStart(2,'0')}.js`);
+ $e('demoHowTo').onclick=()=>togglePanel('demoHowToPanel');$e('demoSettings').onclick=()=>togglePanel('demoSettingsPanel');
+ const files=Array.from({length:104},(_,i)=>`src/game-${String(i).padStart(2,'0')}.js`);
  Promise.all(files.map(src=>fetch(src).then(r=>{if(!r.ok)throw new Error(`Failed to load ${src}: ${r.status}`);return r.text()}))).then(parts=>{
   (0,eval)(parts.join('\n'));
   const tutorial=document.getElementById('tutorialDialog');
@@ -22,21 +21,9 @@
    if(tutorial.open)tutorial.close();
   }
   const canContinue=hasValidSave();
-  const continueBtn=$e('demoContinue');
-  continueBtn.hidden=false;continueBtn.disabled=!canContinue;continueBtn.textContent=canContinue?'繼續':'繼續（無存檔）';
-  $e('demoEntryStatus').textContent='Demo 已就緒';
-  $e('demoStart').disabled=false;
-  $e('demoStart').onclick=()=>{
-   window.__SCORCH_ENTRY_ACTIVE=false;
-   hideEntry();
-   tutorialGate=false;
-   if(showTutorial&&!tutorial.open)setTimeout(()=>showTutorial(),0);
-  };
-  if(canContinue)continueBtn.onclick=()=>{
-   window.__SCORCH_ENTRY_ACTIVE=false;
-   hideEntry();
-   const load=document.getElementById('loadBtn');if(load)load.click();
-   setTimeout(()=>{tutorialGate=false},250);
-  };
+  const continueBtn=$e('demoContinue');continueBtn.hidden=false;continueBtn.disabled=!canContinue;continueBtn.textContent=canContinue?'繼續':'繼續（無存檔）';
+  $e('demoEntryStatus').textContent='Demo 已就緒';$e('demoStart').disabled=false;
+  $e('demoStart').onclick=()=>{window.__SCORCH_ENTRY_ACTIVE=false;hideEntry();tutorialGate=false;if(showTutorial&&!tutorial.open)setTimeout(()=>showTutorial(),0)};
+  if(canContinue)continueBtn.onclick=()=>{window.__SCORCH_ENTRY_ACTIVE=false;hideEntry();const load=document.getElementById('loadBtn');if(load)load.click();setTimeout(()=>{tutorialGate=false},250)};
  }).catch(err=>{window.__SCORCH_BOOT_ERROR=String(err?.stack||err);console.error(err);$e('demoEntryStatus').textContent='遊戲程式載入失敗，請重新整理。';const t=document.getElementById('toast');if(t){t.textContent='遊戲程式載入失敗，請重新整理。';t.classList.add('show')}})
 })();
