@@ -7,7 +7,6 @@
   if(!state.knowledge.scoutedLocations||typeof state.knowledge.scoutedLocations!=='object')state.knowledge.scoutedLocations={};
   state.knowledge.scoutedLocations.base=state.knowledge.scoutedLocations.base||{day:1,method:'起點'};
   state.knowledge.observedLocations.base=state.knowledge.observedLocations.base||{day:1,method:'起點'};
-  // Existing full searches are stronger than scouting and migrate forward automatically.
   for(const loc of locations){
    if(loc.id!=='base'&&state.locations?.[loc.id]?.searched&&!state.knowledge.scoutedLocations[loc.id]){
     state.knowledge.scoutedLocations[loc.id]={day:state.day,method:'既有搜索紀錄'};
@@ -41,10 +40,28 @@
   }
   state.knowledge.scoutedLocations[id]={day:state.day,method:'親自偵察'};
   state.knowledge.observedLocations[id]={day:state.day,method:'親自偵察'};
+  // Keep legacy fog knowledge in sync because itinerary/search guards still use state.intel.
+  state.intel[id]={day:state.day,verifiedDay:state.day,summary:typeof scoutSummaryV68==='function'?scoutSummaryV68(id):'已確認地點用途；實際庫存仍未知。',source:'親自偵察',confidence:100};
   addScoutKnowledge(id);
   log(`你完成一趟偵察，只確認了「${loc.name}」的身份與外觀線索；沒有搜索物資，也沒有取得大型物件或人物資訊。`,'good');
   document.getElementById('locationDialog')?.close();
   render();saveGame(false);
+ }
+ function applyQuickSearchBlocker(loc){
+  const b=$('searchLoc');if(!loc||!b)return;
+  const need=typeof quickSearchTimeV69==='function'?quickSearchTimeV69(loc):timeCostFor(loc);
+  const left=typeof currentPeriodHoursLeftV26==='function'?currentPeriodHoursLeftV26():state.hoursLeft;
+  const cooldown=typeof searchAvailableV69==='function'?searchAvailableV69(loc.id):true;
+  const timeOk=state.day>=30||left+1e-6>=need;
+  b.disabled=!(cooldown&&timeOk);
+  document.querySelectorAll('.quick-search-time-v71').forEach(n=>n.remove());
+  if(!cooldown){b.title=`今天已搜索過，Day ${state.day+1} 可再次進入`;return}
+  if(!timeOk){
+   b.title=`快速搜索需 ${need}h，目前只剩 ${left}h`;
+   b.textContent=`快速搜索 · 需 ${need}h，剩 ${left}h`;
+   const note=document.createElement('div');note.className='quick-search-time-v71';note.innerHTML=`<b>時間不足</b><span>快速搜索需 ${need}h，目前只剩 ${left}h。</span>`;
+   const actions=$('locActions');if(actions?.parentNode)actions.parentNode.insertBefore(note,actions);
+  }
  }
 
  const scoutOriginalOpenLocation=openLocation;
@@ -52,13 +69,14 @@
   ensureScoutState();
   const loc=mapLoc(id);if(!loc)return;
   if(id!=='base'&&!isScouted(id)){
-   $('locTitle').textContent='未知區域';
+   $('locTitle').textContent='? 未知區域';
    $('locDesc').innerHTML='<div class="resident-unknown-note"><b>尚未偵察</b><p>從遠處只能辨認建物或道路輪廓。你不知道它的名稱、庫存、人物、人口或是否有大型物件。</p></div>';
    $('locMeta').innerHTML=`<div class="meta"><span>行動</span>偵察</div><div class="meta"><span>預估耗時</span>${scoutTimeCost(loc)} 小時</div><div class="meta"><span>結果</span>只確認地點身份與公開特徵</div>`;
    $('locStock').innerHTML='<div class="resident-unknown-note">偵察不等於搜索，不會取得物資或獎勵。</div>';
-   $('locActions').innerHTML='<button id="residentScoutBtn">安排偵察</button><button id="residentScoutCancel" class="secondary">先不去</button>';
+   // Preserve the established scout action id so QA and older bindings still identify this as scout-only.
+   $('locActions').innerHTML='<button id="scoutUnknownV68">安排偵察</button><button id="residentScoutCancel" class="secondary">先不去</button>';
    $('locationDialog').showModal();
-   $('residentScoutBtn').onclick=()=>performScout(id);
+   $('scoutUnknownV68').onclick=()=>performScout(id);
    $('residentScoutCancel').onclick=()=>$('locationDialog').close();
    return;
   }
@@ -72,10 +90,12 @@
    $('locationDialog').showModal();
    $('searchLoc').onclick=()=>searchLocation(loc);
    $('planLoc').onclick=()=>{$('locationDialog').close();openActionCenter(id)};
+   applyQuickSearchBlocker(loc);
    return;
   }
   scoutOriginalOpenLocation(id);
   if(id!=='base')$('locTitle').textContent=`你稱之為「${loc.name}」的地方`;
+  applyQuickSearchBlocker(loc);
  };
 
  const scoutOriginalRenderMap=renderMap;
@@ -84,13 +104,12 @@
   scoutOriginalRenderMap();
   document.querySelectorAll('.node').forEach(node=>{
    const id=node.dataset.id;if(!id||id==='base'||isScouted(id))return;
-   const copy=node.querySelector('.node-copy');if(copy){copy.innerHTML='<b>未知區域</b><small>尚未偵察</small>'}
-   const art=node.querySelector('.node-art');if(art){art.style.backgroundImage='none';art.classList.add('resident-unknown-art')}
+   const copy=node.querySelector('.node-copy');if(copy){copy.innerHTML='<b>? 未知區域</b><small>尚未偵察</small><small>點擊後只能安排偵察</small>'}
+   const art=node.querySelector('.node-art');if(art){art.style.backgroundImage='none';art.textContent='?';art.classList.add('resident-unknown-art')}
    node.classList.remove('rumor','map-occupied','map-evacuated','map-depleted','map-thinning','cold');
-   node.classList.add('resident-unknown-node');
+   node.classList.add('resident-unknown-node','fog-unknown-v68');
   });
   document.querySelector('.world-map-summary')?.classList.add('resident-hidden');
-  // Population glows are world truth and must not be visible before the related location is scouted.
   document.querySelectorAll('.settlement-glow').forEach(el=>el.classList.add('resident-hidden'));
   document.querySelectorAll('.node').forEach(n=>n.onclick=()=>{
    if(state.mapPlanner?.active){state.mapPlanner.target=n.dataset.id;renderMap()}
