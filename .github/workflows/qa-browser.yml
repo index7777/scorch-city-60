@@ -46,6 +46,9 @@ jobs:
           node --check qa/resident-vehicle-panel-smoke.mjs
           node --check qa/resident-disabled-action-smoke.mjs
           node --check qa/resident-source-icons-smoke.mjs
+          node --check qa/resident-longpath-smoke.mjs
+          node --check qa/resident-save-migration-smoke.mjs
+          node --check qa/resident-info-consistency-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -104,3 +107,6 @@ jobs:
           timeout 90s node qa/resident-vehicle-panel-smoke.mjs
           timeout 90s node qa/resident-disabled-action-smoke.mjs
           timeout 90s node qa/resident-source-icons-smoke.mjs
+          timeout 90s node qa/resident-longpath-smoke.mjs
+          timeout 90s node qa/resident-save-migration-smoke.mjs
+          timeout 90s node qa/resident-info-consistency-smoke.mjs
