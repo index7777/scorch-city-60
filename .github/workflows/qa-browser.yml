@@ -53,6 +53,7 @@ jobs:
           node --check qa/resident-stepwise-exploration-smoke.mjs
           node --check qa/resident-hidden-population-smoke.mjs
           node --check qa/resident-physical-water-backpack-smoke.mjs
+          node --check qa/resident-finite-stock-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -118,3 +119,4 @@ jobs:
           timeout 90s node qa/resident-stepwise-exploration-smoke.mjs
           timeout 90s node qa/resident-hidden-population-smoke.mjs
           timeout 90s node qa/resident-physical-water-backpack-smoke.mjs
+          timeout 90s node qa/resident-finite-stock-smoke.mjs
