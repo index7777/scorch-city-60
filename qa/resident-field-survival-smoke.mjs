@@ -20,11 +20,13 @@ const result=await evaluate(`(()=>{
  state.resources.battery=999;state.resources.fuel=999;
  state.player={hydration:100,satiety:100,stamina:100,health:100,bodyTemp:36.5,heat:0,dead:false,deathReason:''};
  state.residentSurvivalClock={day:30,phase:'day',hoursLeft:0};
+ state.searchPacingV69={schema:1,locations:{homes:{visits:0,quick:0,full:0,lastSearchDay:0}}};
+ state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.scoutedLocations.homes={day:1,method:'QA'};
  const loc=mapLoc('homes');state.locations.homes.remaining={...state.locations.homes.remaining,water:4,food:2};
  const before={heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,log:state.log.length};
  searchLocation(loc);
  const messages=state.log.slice(before.log).map(x=>x.msg||'');
- return {heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,dead:!!state.player.dead,logged:messages.some(x=>x.startsWith('住宅區 搜索：'))};
+ return {heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,dead:!!state.player.dead,logged:messages.some(x=>x.startsWith('住宅區快速搜索：')||x.startsWith('住宅區 搜索：'))};
 })()`);
 assert(result.logged,'quick search did not complete in fixture');
 assert(result.heat>0,'Day 30 quick search did not accumulate resident heat');
