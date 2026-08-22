@@ -1,6 +1,7 @@
 // v14.4 Batch G — hard-fog opening: zero starting resources, personal shelter/backpack only, no future-system UI leaks.
 (function(){
  const OPENING_RESOURCE_KEYS_V112=['water','food','battery','medicine','fuel','parts','coolant','filters','data'];
+ const OPENING_UI_LEAKS_V112=['已知城市水源','已發現大型物件','外部冷站','中央通風站','大型資產','研究資料','已知倖存人口','中央站容量','路線規劃'];
  function ensureOpeningPhysicalStateV112(s=state){
   s.backpack=s.backpack&&typeof s.backpack==='object'?s.backpack:{};
   s.backpack.capacityKg=50;
@@ -50,6 +51,19 @@
    base.innerHTML=`<div class="card hard-fog-shelter-v112"><b>儲放空間 ${s.shelterStorage.currentKg.toFixed(1)} / ${s.shelterStorage.capacityKg} kg</b><small>可以把帶回來的東西放在這裡。</small></div><div class="card hard-fog-power-v112"><b>充電插座 ${s.shelterPower.outlets} 個</b><small>耐熱屋可以緩慢充電；目前只知道可替行動電源或移動風扇電池充電。</small></div>`;
   }
  }
+ function pruneOpeningKnowledgeLeaksV112(){
+  const left=document.querySelector('.left-panel');
+  if(!left)return;
+  for(const el of left.querySelectorAll('*')){
+   if(el.closest('.hard-fog-backpack-v112,.hard-fog-shelter-v112,.hard-fog-power-v112'))continue;
+   if(el.children.length)continue;
+   const text=(el.textContent||'').trim();
+   if(!OPENING_UI_LEAKS_V112.some(leak=>text.includes(leak)))continue;
+   const row=el.closest('.card,.resource-row,.resource-item,.stat-row,.kv,li')||el;
+   row.hidden=true;
+   row.setAttribute('aria-hidden','true');
+  }
+ }
  function hideFutureUiV112(){
   const hide=sel=>document.querySelectorAll(sel).forEach(el=>{el.hidden=true;el.setAttribute('aria-hidden','true')});
   hide('.bottom-strip');
@@ -62,6 +76,7 @@
   const cityTitle=document.querySelector('.city-header h2');if(cityTitle)cityTitle.textContent='耐熱屋周邊';
   const objectiveEl=document.getElementById('objective');if(objectiveEl)objectiveEl.textContent='先看看耐熱屋周圍能直接前往的方向。';
   const rightTitle=document.querySelector('.right-panel .section-head h2');if(rightTitle)rightTitle.textContent='你看到與聽到的事';
+  pruneOpeningKnowledgeLeaksV112();
  }
  function rewriteBroadcastOnlyCopyV112(){
   const entry=document.getElementById('demoEntry');
