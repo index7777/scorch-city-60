@@ -10,13 +10,13 @@ function send(method,params={}){return new Promise((resolve,reject)=>{const id=+
 async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text||'evaluate exception');return r.result?.value}
 await send('Runtime.enable');
 await waitFor(()=>evaluate(`typeof ensureCoreNpcStateV121==='function'&&typeof advanceNpcAutonomyV121==='function'&&typeof setCompanionV121==='function'`),30000);
-let snap=await evaluate(`(()=>{const s=qaStateV84();window.state=s;applyZeroResourceOpeningV112(s);delete s.coreNpcV121;ensureCoreNpcStateV121(s);s.explorationV113={current:'homes',discovered:['base','homes']};s.explorationV118={selected:null,explored:['base'],observed:{base:true,homes:false}};renderMap();return {count:Object.keys(s.coreNpcV121.people).length,known:s.coreNpcV121.knownIds.length,panel:!!document.querySelector('.npc-presence-v121'),text:document.getElementById('map')?.innerText||''};})()`);
+let snap=await evaluate(`(()=>{const s=qaStateV84();window.state=s;applyZeroResourceOpeningV112(s);delete s.coreNpcV121;ensureCoreNpcStateV121(s);s.explorationV113={current:'homes',discovered:['base','homes']};s.explorationV118={selected:null,explored:['base'],observed:{base:true,homes:false}};renderMap();return {count:Object.keys(s.coreNpcV121.people).length,known:s.coreNpcV121.knownIds.length,panel:!!document.querySelector('.npc-presence-v121,.social-presence-v122'),text:document.getElementById('map')?.innerText||''};})()`);
 assert(snap.count===10,'core NPC roster should contain exactly 10 people');
 assert(snap.known===0,'opening leaked known NPC identities');
 assert(!snap.panel,'NPC framework appeared before location was observed');
 assert(!snap.text.includes('許佩真'),'unencountered NPC name leaked before exploration');
 await evaluate(`(()=>{state.explorationV118.observed.homes=true;renderMap();return true})()`);await sleep(50);
-snap=await evaluate(`(()=>({known:state.coreNpcV121.knownIds.slice(),text:document.querySelector('.npc-presence-v121')?.innerText||'',location:state.coreNpcV121.people['npc-xu-peizhen'].location}))()`);
+snap=await evaluate(`(()=>({known:state.coreNpcV121.knownIds.slice(),text:document.querySelector('.social-presence-v122,.npc-presence-v121')?.innerText||'',location:state.coreNpcV121.people['npc-xu-peizhen'].location}))()`);
 assert(snap.known.includes('npc-xu-peizhen'),'observed co-located NPC was not encountered');
 assert(snap.text.includes('許佩真')&&snap.text.includes('社區工作者'),'encountered NPC identity/role missing');
 let follow=await evaluate(`(()=>{const n=state.coreNpcV121.people['npc-xu-peizhen'];const r=setCompanionV121(n.id,true);syncCompanionsV121('store');return {ok:r.ok,companion:n.companion,location:n.location};})()`);
