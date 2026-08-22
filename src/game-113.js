@@ -46,7 +46,7 @@
   ex.current=target;if(!ex.discovered.includes(target))ex.discovered.push(target);
   state.locations[target]=state.locations[target]||{};state.locations[target].arrived=true;
   const name=mapLoc(target)?.name||'未知地點';
-  log(`你抵達 ${name}。只有現在能直接看見的鄰近道路與輪廓會出現在地圖上。`,'good');
+  log(`你抵達 ${name}。`,'good');
   render();
  }
  function localRoadSvgV113(current,neighbors){
@@ -63,12 +63,12 @@
    if(!isCurrent&&!isNeighbor&&!isKnown)return '';
    let label='',detail='',cls='node step-node-v113';
    if(isCurrent){cls+=' base route-target';label=l.name;detail='你現在的位置';}
-   else if(isKnown){const h=travelHoursV113(id);cls+=' safe';label=l.name;detail=isNeighbor?`${directionV113(current,id)}方 · 可直接前往 · ${h}h`:`已知地點 · 較遠 · ${Number.isFinite(h)?h+'h':'路線未連通'}`;}
-   else {cls+=' rumor';label=`${directionV113(current,id)}方道路`;detail='遠處可見輪廓 · 抵達後才能確認';}
+   else if(isKnown){const h=travelHoursV113(id);cls+=' safe';label=l.name;detail=isNeighbor?`${directionV113(current,id)}方 · 可直接前往 · ${h}h`:`較遠 · ${Number.isFinite(h)?h+'h':'路線未連通'}`;}
+   else {cls+=' rumor';label=`${directionV113(current,id)}方道路`;detail='遠處可見輪廓';}
    const disabled=!isCurrent&&!isNeighbor&&!isKnown?'disabled':'';
    return `<button class="${cls}" data-step-go="${id}" ${disabled} style="left:${l.x}%;top:${l.y}%;transform:translate(-50%,-50%)"><span class="node-copy"><b>${label}</b><small>${detail}</small></span></button>`;
   }).join('');
-  map.innerHTML=`<div class="world-transform-layer">${localRoadSvgV113(current,neighbors)}</div>${nodes}<div class="world-map-summary step-summary-v113"><b>${mapLoc(current)?.name||'目前位置'}</b><span>${mode.label} · 只顯示眼前可走的道路與已知地點</span><em>未抵達的地點不顯示名稱、資源、人物或總數</em></div>`;
+  map.innerHTML=`<div class="world-transform-layer">${localRoadSvgV113(current,neighbors)}</div>${nodes}<div class="world-map-summary step-summary-v113"><b>${mapLoc(current)?.name||'目前位置'}</b><span>${mode.label}</span></div>`;
   if($('mapPlannerPanel')){$('mapPlannerPanel').hidden=true;$('mapPlannerPanel').innerHTML=''}
   map.querySelectorAll('[data-step-go]').forEach(btn=>{btn.onclick=()=>{if(btn.dataset.stepGo!==current)goToV113(btn.dataset.stepGo)}});
  }
