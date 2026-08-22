@@ -19,13 +19,12 @@ await evaluate(`(()=>{state.explorationV118.observed.homes=true;renderMap();retu
 snap=await evaluate(`(()=>({known:state.coreNpcV121.knownIds.slice(),text:document.querySelector('.npc-presence-v121')?.innerText||'',location:state.coreNpcV121.people['npc-xu-peizhen'].location}))()`);
 assert(snap.known.includes('npc-xu-peizhen'),'observed co-located NPC was not encountered');
 assert(snap.text.includes('許佩真')&&snap.text.includes('社區工作者'),'encountered NPC identity/role missing');
+let follow=await evaluate(`(()=>{const n=state.coreNpcV121.people['npc-xu-peizhen'];const r=setCompanionV121(n.id,true);syncCompanionsV121('store');return {ok:r.ok,companion:n.companion,location:n.location};})()`);
+assert(follow.ok&&follow.companion&&follow.location==='store','encountered companion did not follow movement');
 const before=await evaluate(`state.coreNpcV121.people['npc-chen-guowei'].location`);
 await evaluate(`advanceNpcAutonomyV121(6)`);
 const after=await evaluate(`state.coreNpcV121.people['npc-chen-guowei'].location`);
 assert(before!==after,'independent NPC autonomy did not advance route');
-let follow=await evaluate(`(()=>{const n=state.coreNpcV121.people['npc-xu-peizhen'];const r=setCompanionV121(n.id,true);syncCompanionsV121('store');return {ok:r.ok,companion:n.companion,location:n.location};})()`);
-assert(follow.ok&&follow.companion&&follow.location==='store','encountered companion did not follow movement');
-await evaluate(`advanceNpcAutonomyV121(12)`);
 follow=await evaluate(`(()=>{const n=state.coreNpcV121.people['npc-xu-peizhen'];return {location:n.location,companion:n.companion}})()`);
 assert(follow.location==='store'&&follow.companion,'companion was moved by independent autonomy');
 console.log('PASS resident Batch 4 core NPC encounter/autonomy/companion foundation');ws.close();
