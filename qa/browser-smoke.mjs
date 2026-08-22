@@ -10,11 +10,11 @@ const targets=await waitFor(async()=>{
 assert(targets?.webSocketDebuggerUrl,'no Chrome page target');
 const ws=new WebSocket(targets.webSocketDebuggerUrl);
 await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})});
-let seq=0;const pending=new Map(),exceptions=[];
+let seq=0;const pending=new Map(),exceptions=[],testFailures=[];
 ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(new Error(m.error.message)):resolve(m.result)}else if(m.method==='Runtime.exceptionThrown'){const d=m.params?.exceptionDetails;exceptions.push(d?.exception?.description||d?.text||'Runtime exception')}});
 function send(method,params={}){return new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}))})}
 async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails){const d=r.exceptionDetails,desc=d.exception?.description||d.text||'evaluate exception';throw new Error(desc)}return r.result?.value}
-async function test(name,fn){await fn();console.log(`PASS ${name}`)}
+async function test(name,fn){try{await fn();console.log(`PASS ${name}`)}catch(err){const msg=`${name}: ${err?.message||err}`;testFailures.push(msg);console.error(`FAIL ${msg}`)}}
 
 await send('Runtime.enable');await send('Page.enable');
 await waitFor(()=>evaluate(`document.readyState==='complete' && document.getElementById('demoEntryStatus')?.textContent.includes('Demo 已就緒')`),30000);
@@ -38,8 +38,8 @@ await test('B1 over-budget itinerary shows disabled start and explicit overrun w
 });
 
 await test('B2 feasible itinerary start click reaches execution handler',async()=>{
- const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=8;state.locations.store.searched=false;delete state.intel.store;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart');if(!b||b.disabled||!itineraryStartStateV71().ok)return false;const before=ensureItineraryV27().status;b.click();const after=ensureItineraryV27().status;return before==='planning'&&after!=='planning'})()`);
- assert(ok,'enabled itinerary start click did not reach execution');
+ const diag=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=8;state.locations.store.searched=false;delete state.intel.store;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart'),s=itineraryStartStateV71(),before=ensureItineraryV27().status;if(b&&!b.disabled&&s.ok)b.click();const after=ensureItineraryV27().status;return {exists:!!b,disabled:!!b?.disabled,startOk:s.ok,issues:s.issues,before,after}})()`);
+ assert(diag.exists&&!diag.disabled&&diag.startOk&&diag.before==='planning'&&diag.after!=='planning',JSON.stringify(diag));
  await waitFor(()=>evaluate(`ensureItineraryV27().status!=='running'`),10000);
 });
 
@@ -102,6 +102,7 @@ await test('X31/X32 visible naming is normalized',async()=>{
 });
 
 await sleep(150);
-assert(exceptions.length===0,`browser runtime exceptions: ${exceptions.join(' | ')}`);
+if(exceptions.length)testFailures.push(`browser runtime exceptions: ${exceptions.join(' | ')}`);
+if(testFailures.length){for(const msg of testFailures)console.error(`FAIL ${msg}`);throw new Error(`${testFailures.length} browser smoke test(s) failed`)}
 console.log('PASS browser runtime exception check');
 ws.close();
