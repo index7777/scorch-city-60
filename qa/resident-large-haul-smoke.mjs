@@ -21,12 +21,14 @@ const result=await evaluate(`(()=>{
  state.vehicle=state.vehicle||{};state.vehicle.capacityKg=700;state.vehicle.hasAC=false;state.vehicle.acActive=false;
  state.resources.battery=50;state.resources.fuel=50;
  state.mapPlanner={active:false,target:'fire',routeMode:'fastest'};
- for(const a of assetDefs){state.assets[a.id]={...(state.assets[a.id]||{}),discovered:false,transported:false,owner:'world',location:a.location}}
- const compressor=assetDefs.find(a=>a.id==='compressorA');
+ state.assets=state.assets||{};
+ state.assets.compressorA={...(state.assets.compressorA||{}),discovered:true,transported:false,owner:'world',location:'industrial'};
+ state.assets.pump={...(state.assets.pump||{}),discovered:true,transported:false,owner:'world',location:'fire'};
+ const compressor={id:'compressorA',weight:420,need:'vehicle'};
  const carBlocked=haulEstimateV106(compressor);
  state.logistics.heavyReady=true;
  const truckReady=haulEstimateV106(compressor);
- const pump=assetDefs.find(a=>a.id==='pump');state.assets.pump.discovered=true;
+ const pump={id:'pump',weight:145,need:'cart'};
  const pumpEstimate=haulEstimateV106(pump),before={battery:state.resources.battery,fuel:state.resources.fuel,moved:state.logistics.moved};
  transportAsset('pump');
  const after={battery:state.resources.battery,fuel:state.resources.fuel,moved:state.logistics.moved,transported:state.assets.pump.transported,owner:state.assets.pump.owner,location:state.assets.pump.location};
