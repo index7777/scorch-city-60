@@ -19,6 +19,9 @@ const result=await evaluate(`(()=>{
  state.gear=state.gear||{};state.gear.coolingPack=true;state.gear.vehicle=false;
  state.resources.battery=999;state.resources.fuel=999;
  state.player={hydration:100,satiety:100,stamina:100,health:100,bodyTemp:36.5,heat:0,dead:false,deathReason:''};
+ // Reset both resident clocks to Day 30 so this fixture measures one field action,
+ // not a synthetic Day 1 -> Day 30 metabolism jump during the action's render().
+ state.residentClock={day:30,phase:'day',hoursLeft:0};
  state.residentSurvivalClock={day:30,phase:'day',hoursLeft:0};
  state.searchPacingV69={schema:1,locations:{homes:{visits:0,quick:0,full:0,lastSearchDay:0}}};
  state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.scoutedLocations.homes={day:1,method:'QA'};
