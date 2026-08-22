@@ -8,9 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: qa-browser-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   browser-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,19 +54,21 @@ jobs:
           cleanup(){ kill "$CHROME_PID" "$HTTP_PID" 2>/dev/null || true; }
           trap cleanup EXIT
 
+          ready=0
           for i in $(seq 1 80); do
-            if curl -fsS http://127.0.0.1:9222/json/version >/dev/null && curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+            if curl -fs http://127.0.0.1:9222/json/version >/dev/null 2>&1 && curl -fs http://127.0.0.1:4173/ >/dev/null 2>&1; then
+              ready=1
               break
             fi
             sleep .25
           done
 
-          if ! curl -fsS http://127.0.0.1:9222/json/version >/dev/null; then
-            echo "Chromium CDP did not start"
+          if [ "$ready" -ne 1 ]; then
+            echo "Chromium CDP did not start within 20 seconds"
             cat /tmp/scorch-chrome.log || true
             exit 1
           fi
 
-          node qa/browser-smoke.mjs
-          node qa/resident-fog-smoke.mjs
-          node qa/resident-p0-smoke.mjs
+          timeout 90s node qa/browser-smoke.mjs
+          timeout 90s node qa/resident-fog-smoke.mjs
+          timeout 90s node qa/resident-p0-smoke.mjs
