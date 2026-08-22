@@ -1,11 +1,9 @@
-// v14.3 Batch D — make the vehicle panel read from the authoritative transport model.
+// v14.3 Batch D/F — vehicle panel reads from the authoritative transport model; central lifecycle owns refresh timing.
 (function(){
  function ownedTransportStateV107(){
   const ids=new Set(['foot']);
   if(state.gear?.cart||state.cart===true||state.hasCart===true)ids.add('cart');
-  if(state.gear?.vehicle||state.car===true||state.hasCar===true||state.truck===true||state.hasTruck===true){
-   ids.add(state.logistics?.heavyReady?'truck':'car');
-  }
+  if(state.gear?.vehicle||state.car===true||state.hasCar===true||state.truck===true||state.hasTruck===true)ids.add(state.logistics?.heavyReady?'truck':'car');
   return ids;
  }
  function transportPanelCardV107(id,owned){
@@ -25,7 +23,6 @@
   if(btn&&!btn.dataset.boundV107){btn.dataset.boundV107='1';btn.addEventListener('click',()=>setTimeout(renderAuthoritativeVehiclePanelV107,0))}
  }
  window.renderAuthoritativeVehiclePanelV107=renderAuthoritativeVehiclePanelV107;
- const originalRenderV107=render;
- render=function(){const out=originalRenderV107();bindAuthoritativeVehiclePanelV107();if(document.getElementById('vehicleDialog')?.open)renderAuthoritativeVehiclePanelV107();return out};
+ window.bindAuthoritativeVehiclePanelV107=bindAuthoritativeVehiclePanelV107;
  bindAuthoritativeVehiclePanelV107();
 })();
