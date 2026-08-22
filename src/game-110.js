@@ -38,9 +38,22 @@
   renderResidentWaterTruthV110();
   if(document.getElementById('electricityDialog')?.open)renderAuthoritativeElectricityV110();
   if(document.getElementById('vehicleDialog')?.open&&typeof renderAuthoritativeVehiclePanelV107==='function')renderAuthoritativeVehiclePanelV107();
+  if(typeof bindAuthoritativeVehiclePanelV107==='function')bindAuthoritativeVehiclePanelV107();
   if(typeof decorateDisabledActionsV108==='function')decorateDisabledActionsV108(document);
   if(typeof decorateKnowledgeSourceIconsV109==='function')decorateKnowledgeSourceIconsV109(document);
  }
+ const originalMergeSaveV110=mergeSave;
+ mergeSave=function(data){
+  const out=originalMergeSaveV110(data);
+  if(data&&Number.isFinite(Number(data.day)))state.day=Number(data.day);
+  if(data&&typeof data.phase==='string')state.phase=data.phase;
+  if(data&&Number.isFinite(Number(data.hoursLeft)))state.hoursLeft=Number(data.hoursLeft);
+  if(typeof ensureWaterAllocationV97==='function')ensureWaterAllocationV97();
+  if(typeof ensureResidentElectricityV100==='function')ensureResidentElectricityV100();
+  state.residentClock=state.residentClock&&typeof state.residentClock==='object'?state.residentClock:{day:state.day,phase:state.phase,hoursLeft:state.hoursLeft};
+  state.residentSurvivalClock=state.residentSurvivalClock&&typeof state.residentSurvivalClock==='object'?state.residentSurvivalClock:{day:state.day,phase:state.phase,hoursLeft:state.hoursLeft};
+  return out;
+ };
  window.ResidentSystemsV110={read:residentReadModelV110,water:residentWaterReadV110,electricity:residentElectricityReadV110,transport:residentTransportReadV110,knowledge:residentKnowledgeReadV110,refresh:residentUiRefreshV110};
  window.residentReadModelV110=residentReadModelV110;
  window.renderAuthoritativeElectricityV110=renderAuthoritativeElectricityV110;
