@@ -28,7 +28,7 @@ await test('B6 unknown node is fogged and only scout action is exposed',async()=
 });
 
 await test('B3 insufficient-time quick search is visibly disabled',async()=>{
- const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=.25;state.locations.store.searched=false;state.intel.store={day:1,verifiedDay:1,summary:'已確認地點用途',source:'QA',confidence:100};const r=searchRecordV69('store');r.lastSearchDay=0;r.visits=0;openLocation('store');const b=document.getElementById('searchLoc'),note=document.querySelector('.quick-search-time-v71');const good=!!b&&b.disabled&&/需/.test(b.textContent)&&!!note;document.getElementById('locationDialog')?.close();return good})()`);
+ const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=.25;state.locations.store.searched=false;state.intel.store={day:1,verifiedDay:1,summary:'已確認地點用途',source:'QA',confidence:100};state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.observedLocations=state.knowledge.observedLocations||{};state.knowledge.scoutedLocations.store={day:1,method:'QA'};state.knowledge.observedLocations.store={day:1,method:'QA'};const r=searchRecordV69('store');r.lastSearchDay=0;r.visits=0;openLocation('store');const b=document.getElementById('searchLoc'),note=document.querySelector('.quick-search-time-v71');const good=!!b&&b.disabled&&/需/.test(b.textContent)&&!!note;document.getElementById('locationDialog')?.close();return good})()`);
  assert(ok,'quick search remained actionable without enough time');
 });
 
