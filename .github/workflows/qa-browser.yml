@@ -63,6 +63,12 @@ jobs:
           node --check qa/resident-intelligence-discovery-smoke.mjs
           node --check qa/resident-knowledge-visibility-smoke.mjs
           node --check qa/resident-local-events-smoke.mjs
+          node --check qa/resident-barter-station-smoke.mjs
+          node --check qa/resident-community-requests-smoke.mjs
+          node --check qa/resident-recurring-npc-smoke.mjs
+          node --check qa/resident-local-npc-smoke.mjs
+          node --check qa/resident-mid-social-events-smoke.mjs
+          node --check qa/resident-midgame-intelligence-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -138,3 +144,9 @@ jobs:
           timeout 90s node qa/resident-intelligence-discovery-smoke.mjs
           timeout 90s node qa/resident-knowledge-visibility-smoke.mjs
           timeout 90s node qa/resident-local-events-smoke.mjs
+          timeout 90s node qa/resident-barter-station-smoke.mjs
+          timeout 90s node qa/resident-community-requests-smoke.mjs
+          timeout 90s node qa/resident-recurring-npc-smoke.mjs
+          timeout 90s node qa/resident-local-npc-smoke.mjs
+          timeout 90s node qa/resident-mid-social-events-smoke.mjs
+          timeout 90s node qa/resident-midgame-intelligence-smoke.mjs
