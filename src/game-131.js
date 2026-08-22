@@ -1,0 +1,23 @@
+// v15.5 Batch 7 — mid-scale social events, triggered only by legitimate encounters/conversations.
+(function(){
+ const MID_EVENTS_V131={
+  'neighbor-refuses-entry':{location:'homes',title:'住戶拒絕開門',body:'洪阿姨提到有住戶明確拒絕讓陌生人進去。',trigger:s=>localNpcV130?.('npc-hong-ayi',s)?.talked?.includes('npc-hong-ayi-l02')},
+  'missing-person-search':{location:'store',title:'尋人請求',body:'安琪問你是否願意幫忙留意她正在找的人。',trigger:s=>localNpcV130?.('npc-anqi',s)?.talked?.includes('npc-anqi-l02')},
+  'medicine-request':{location:'clinic',title:'藥品需求',body:'阿梅說她正在照顧的人需要能實際用上的藥品。',trigger:s=>localNpcV130?.('npc-mei',s)?.talked?.includes('npc-mei-l03')},
+  'rescue-request':{location:'school',title:'需要協助離開',body:'小柯的傷勢讓他無法輕鬆自行移動。',trigger:s=>localNpcV130?.('npc-xiao-ke',s)?.talked?.includes('npc-xiao-ke-l02')},
+  'building-access-negotiation':{location:'school',title:'進出權限協調',body:'蔡育仁願意談建物與鑰匙，但要先確認你打算怎麼使用。',trigger:s=>recurringNpcV129?.('npc-cai-yuren',s)?.talked?.includes('npc-cai-yuren-r03')},
+  'equipment-repair-request':{location:'industrial',title:'設備維修需求',body:'陳國威指出眼前有一項設備問題，但需要實際工具或零件才能處理。',trigger:s=>socialNpcV122?.('npc-chen-guowei',s)?.talked?.includes('npc-chen-guowei-t04')},
+  'delivery-exchange-request':{location:'warehouse',title:'搬運交換請求',body:'何欣怡提出一筆以實際物資為前提的搬運交換。',trigger:s=>socialNpcV122?.('npc-he-xinyi',s)?.talked?.includes('npc-he-xinyi-t09')},
+  'rumor-proven-false':{location:'subway',title:'傳聞對不上現場',body:'浩子先前轉述的消息，和你目前能確認的現場狀況不一致。',trigger:s=>localNpcV130?.('npc-haozi',s)?.talked?.includes('npc-haozi-l03')}
+ };
+ function ensureMidEventsV131(s=state){s.midEventsV131=s.midEventsV131&&typeof s.midEventsV131==='object'?s.midEventsV131:{};if(!s.midEventsV131.resolved||typeof s.midEventsV131.resolved!=='object')s.midEventsV131.resolved={};return s.midEventsV131}
+ function currentObservedV131(s=state){const loc=s.explorationV113?.current;return loc&&s.explorationV118?.observed?.[loc]===true?loc:null}
+ function visibleMidEventV131(s=state){if(!s.flags?.hardFogOpeningV112)return null;const loc=currentObservedV131(s);if(!loc)return null;const ms=ensureMidEventsV131(s);for(const [id,def] of Object.entries(MID_EVENTS_V131)){if(def.location!==loc||ms.resolved[id])continue;let ok=false;try{ok=!!def.trigger(s)}catch{}if(ok)return{id,...def}}return null}
+ function resolveMidEventV131(id,outcome='handled',s=state){const e=visibleMidEventV131(s);if(!e||e.id!==id)return{ok:false,reason:'event-not-visible'};ensureMidEventsV131(s).resolved[id]={outcome,day:Number(s.day)||1};if(typeof render==='function')render();return{ok:true,id,outcome}}
+ function renderMidEventV131(){if(!state.flags?.hardFogOpeningV112)return;const map=document.getElementById('map');if(!map)return;map.querySelector('.mid-event-v131')?.remove();const e=visibleMidEventV131();if(!e)return;const p=document.createElement('section');p.className='mid-event-v131';p.setAttribute('aria-label','眼前的人提出一件事');const b=document.createElement('b');b.textContent=e.title;const body=document.createElement('p');body.textContent=e.body;const actions=document.createElement('div');const handle=document.createElement('button');handle.type='button';handle.textContent='處理';handle.onclick=()=>resolveMidEventV131(e.id,'handled');const leave=document.createElement('button');leave.type='button';leave.textContent='先不處理';leave.onclick=()=>resolveMidEventV131(e.id,'left');actions.append(handle,leave);p.append(b,body,actions);map.appendChild(p)}
+ function stylesV131(){if(document.getElementById('midEventStylesV131'))return;const st=document.createElement('style');st.id='midEventStylesV131';st.textContent='.mid-event-v131{position:absolute;right:18px;top:18px;z-index:15;width:min(330px,40%);display:grid;gap:7px;padding:11px;border:1px solid rgba(205,190,165,.2);border-radius:11px;background:rgba(20,17,13,.96)}.mid-event-v131 p{margin:0;font-size:.82rem;line-height:1.45}.mid-event-v131>div{display:flex;gap:7px}.mid-event-v131 button{flex:1}@media(max-width:900px){.mid-event-v131{position:relative;right:auto;top:auto;width:auto;margin:12px}}';document.head.appendChild(st)}
+ const prevMakeStateV131=makeState;makeState=function(){const s=prevMakeStateV131();ensureMidEventsV131(s);return s};ensureMidEventsV131(state);
+ const prevRenderMapV131=renderMap;renderMap=function(){const out=prevRenderMapV131();stylesV131();queueMicrotask(renderMidEventV131);return out};
+ const prevRenderV131=render;render=function(){const out=prevRenderV131();stylesV131();queueMicrotask(renderMidEventV131);return out};
+ stylesV131();window.MID_EVENTS_V131=MID_EVENTS_V131;window.ensureMidEventsV131=ensureMidEventsV131;window.visibleMidEventV131=visibleMidEventV131;window.resolveMidEventV131=resolveMidEventV131;window.renderMidEventV131=renderMidEventV131;
+})();
