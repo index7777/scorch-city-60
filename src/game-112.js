@@ -24,6 +24,10 @@
   for(const key of ['water','food','battery'])s.privatePool[key]=0;
   if(s.electricity&&typeof s.electricity==='object')s.electricity.batteryKWh=0;
   ensureOpeningPhysicalStateV112(s);
+  s.backpack.currentKg=0;
+  s.backpack.items=[];
+  s.shelterStorage.currentKg=0;
+  s.shelterStorage.items=[];
   s.flags=s.flags||{};
   s.flags.hardFogOpeningV112=true;
   return s;
