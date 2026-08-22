@@ -31,6 +31,7 @@ jobs:
           node --check qa/resident-fog-smoke.mjs
           node --check qa/resident-p0-smoke.mjs
           node --check qa/resident-survival-smoke.mjs
+          node --check qa/resident-field-survival-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -74,3 +75,4 @@ jobs:
           timeout 90s node qa/resident-fog-smoke.mjs
           timeout 90s node qa/resident-p0-smoke.mjs
           timeout 90s node qa/resident-survival-smoke.mjs
+          timeout 90s node qa/resident-field-survival-smoke.mjs
