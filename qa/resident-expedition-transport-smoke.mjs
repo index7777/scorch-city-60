@@ -24,7 +24,7 @@ const result=await evaluate(`(()=>{
  const car=expeditionEstimate(loc,'vehicle',2,2,false,'');
  state.vehicle.hasAC=true;const carAc=expeditionEstimate(loc,'vehicle',2,2,false,'');
  state.logistics.heavyReady=true;const truck=expeditionEstimate(loc,'vehicle',2,2,false,'compressorA');
- const chiller=expeditionEstimate(mapLoc('coldstore'),'vehicle',2,2,false,'chiller');
+ state.logistics.heavyReady=false;const chiller=expeditionEstimate(mapLoc('coldstore'),'vehicle',2,2,false,'chiller');
  return {foot,car,carAc,truck,chiller};
 })()`);
 assert(result.car.transport.id==='car'&&result.truck.transport.id==='truck','vehicle mode did not resolve through authoritative car/truck profile');
@@ -33,6 +33,6 @@ assert(result.car.fuelNeed>0&&result.foot.fuelNeed===0,'fuel calculation did not
 assert(result.carAc.batteryNeed<=result.car.batteryNeed&&result.carAc.waterNeed<=result.car.waterNeed,'vehicle AC did not reduce Day 30 exposure budget');
 assert(result.truck.cap>=1200&&result.truck.capacityL>=2400,'truck cargo profile was not applied to expedition estimate');
 assert(result.truck.assetVolume>0&&result.truck.returnVolume<result.truck.capacityL,'large asset volume was not reserved from transport capacity');
-assert(result.chiller.carry.ok===false,'oversized large object was not blocked by weight/volume capacity');
+assert(result.chiller.transport.id==='car'&&result.chiller.carry.ok===false,'oversized large object was not blocked by selected car weight/volume capacity');
 console.log('PASS resident expedition transport integration');
 ws.close();
