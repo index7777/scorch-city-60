@@ -22,7 +22,8 @@ const result=await evaluate(`(()=>{
  state.residentSurvivalClock={day:30,phase:'day',hoursLeft:0};
  state.searchPacingV69={schema:1,locations:{homes:{visits:0,quick:0,full:0,lastSearchDay:0}}};
  state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.scoutedLocations.homes={day:1,method:'QA'};
- const loc=mapLoc('homes');state.locations.homes.remaining={...state.locations.homes.remaining,water:4,food:2};
+ state.intel=state.intel||{};state.intel.homes={day:1,verifiedDay:1,summary:'QA 已偵察',source:'QA',confidence:100};
+ const loc=mapLoc('homes');state.locations.homes.searched=false;state.locations.homes.remaining={...state.locations.homes.remaining,water:4,food:2};
  const before={heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,log:state.log.length};
  searchLocation(loc);
  const messages=state.log.slice(before.log).map(x=>x.msg||'');
