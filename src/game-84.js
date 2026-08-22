@@ -71,4 +71,7 @@ fieldTeamValidationV43=function(e){
 const _renderPersonnelV84=renderPersonnel;
 renderPersonnel=function(){const out=_renderPersonnelV84();document.querySelectorAll('[data-person]').forEach(card=>{const id=card.dataset.person,r=ensureHighRiskInjuriesV84()[id];if(!r||!highRiskInjuredV84(id)||card.querySelector('.high-risk-injury-v84'))return;const n=document.createElement('small');n.className='high-risk-injury-v84';n.textContent=`外勤傷勢：${r.label} · 暫停出勤至 Day ${r.untilDay+1}`;card.appendChild(n)});return out};
 
+/* QA bridge: expose the same mutable state object to rendered smoke tests without duplicating accounting. */
+function qaStateV84(){return state}
+
 renderPersonnel();
