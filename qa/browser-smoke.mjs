@@ -92,7 +92,7 @@ await test('X29 high-risk injury and time-overrun mutate real state',async()=>{
 });
 
 await test('X30 contacted settlement exposes enabled trade entry',async()=>{
- const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();const id=Object.keys(state.settlements||{})[0];if(!id)return false;const s=state.settlements[id];state.locations[s.location].searched=true;openSettlements();const b=document.querySelector('[data-settlement-trade-v79="'+id+'"]');const good=!!b&&!b.disabled&&/發起交易/.test(b.textContent);document.getElementById('settlementDialog')?.close();return good})()`);
+ const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();const id=Object.keys(state.settlements||{})[0];if(!id)return false;const s=state.settlements[id];state.locations[s.location].searched=true;state.knowledge=state.knowledge||{};state.knowledge.contacts=Array.isArray(state.knowledge.contacts)?state.knowledge.contacts:[];const npcEntry=Object.entries(state.npcs||{}).find(([,n])=>n&&n.alive&&n.location===s.location);if(!npcEntry)return false;const [npcId]=npcEntry;if(!state.knowledge.contacts.includes(npcId))state.knowledge.contacts.push(npcId);openSettlements();const b=document.querySelector('[data-settlement-trade-v79="'+id+'"]');const good=!!b&&!b.disabled&&/發起交易/.test(b.textContent);document.getElementById('settlementDialog')?.close();return good})()`);
  assert(ok,'contacted settlement did not expose trade entry');
 });
 
