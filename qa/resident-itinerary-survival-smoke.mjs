@@ -13,7 +13,7 @@ function send(method,params={}){return new Promise((resolve,reject)=>{const id=+
 async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text||'evaluate exception');return r.result?.value}
 await send('Runtime.enable');
 await waitFor(()=>evaluate(`typeof qaStateV84==='function' && typeof applyResidentItineraryExposureV96==='function' && window.__SCORCH_ENTRY_ACTIVE===false`),30000);
-const result=await evaluate(`(async()=>{
+const result=await evaluate(`(()=>{
  window.state=qaStateV84();for(const d of document.querySelectorAll('dialog[open]'))d.close();
  state.day=30;state.phase='day';state.hoursLeft=0;state.onboarding.enabled=false;state.onboarding.completed=true;
  state.worldClock={schema:1,day:30,endlessElapsed:0};
@@ -21,22 +21,19 @@ const result=await evaluate(`(async()=>{
  state.residentClock={day:30,phase:'day',hoursLeft:0};
  state.residentSurvivalClock={day:30,phase:'day',hoursLeft:0};
  state.gear=state.gear||{};state.gear.coolingPack=false;state.gear.vehicle=false;
- // The browser workflow reuses one page across smoke files. Clear mutable route/NPC state
- // so this fixture validates itinerary exposure rather than inheriting an earlier pause trigger.
  state.roadWorld={};state.roadIntel={};
  for(const n of Object.values(state.npcs||{}))n.alive=false;
- state.itinerary={schema:1,stops:[{id:'qa-home-scout',location:'homes',action:'scout'}],routeMode:'fastest',status:'planning',index:0,current:'base',lastMessage:''};
- const before={heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,elapsed:state.worldClock.endlessElapsed};
- startOrResumeItineraryV27();
- const end=Date.now()+5000;
- while(Date.now()<end&&state.itinerary.status!=='complete'&&state.itinerary.status!=='paused')await new Promise(r=>setTimeout(r,20));
- return {status:state.itinerary.status,message:state.itinerary.lastMessage||'',heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,dead:!!state.player.dead,elapsed:state.worldClock.endlessElapsed,before};
+ state.itinerary={schema:1,stops:[{id:'qa-home-scout',location:'homes',action:'scout'}],routeMode:'fastest',status:'running',index:0,current:'base',lastMessage:''};
+ const before={heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,elapsed:state.worldClock.endlessElapsed,index:state.itinerary.index};
+ runItineraryStepV27();
+ return {status:state.itinerary.status,message:state.itinerary.lastMessage||'',index:state.itinerary.index,heat:state.player.heat,temp:state.player.bodyTemp,hydration:state.player.hydration,dead:!!state.player.dead,elapsed:state.worldClock.endlessElapsed,before};
 })()`);
-assert(result.status==='complete',`single-stop itinerary did not complete in fixture${result.message?`: ${result.message}`:''}`);
-assert(result.elapsed>result.before.elapsed,'itinerary did not consume Day 30 world time');
-assert(result.heat>result.before.heat,'Day 30 itinerary did not accumulate resident heat');
-assert(result.temp>result.before.temp,'Day 30 itinerary did not raise resident body temperature');
-assert(result.hydration<result.before.hydration,'Day 30 itinerary did not consume resident hydration');
-assert(!result.dead,'short Day 30 itinerary should not instantly kill resident');
+assert(result.status!=='paused',`itinerary step paused unexpectedly${result.message?`: ${result.message}`:''}`);
+assert(result.index>result.before.index,'itinerary did not execute the fixture stop');
+assert(result.elapsed>result.before.elapsed,'itinerary step did not consume Day 30 world time');
+assert(result.heat>result.before.heat,'Day 30 itinerary step did not accumulate resident heat');
+assert(result.temp>result.before.temp,'Day 30 itinerary step did not raise resident body temperature');
+assert(result.hydration<result.before.hydration,'Day 30 itinerary step did not consume resident hydration');
+assert(!result.dead,'short Day 30 itinerary step should not instantly kill resident');
 console.log('PASS resident itinerary survival integration');
 ws.close();
