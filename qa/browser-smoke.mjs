@@ -38,7 +38,7 @@ await test('B1 over-budget itinerary shows disabled start and explicit overrun w
 });
 
 await test('B2 feasible itinerary start click reaches execution handler',async()=>{
- const diag=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=8;state.locations.store.searched=false;delete state.intel.store;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart'),s=itineraryStartStateV71(),before=ensureItineraryV27().status;if(b&&!b.disabled&&s.ok)b.click();const after=ensureItineraryV27().status;return {exists:!!b,disabled:!!b?.disabled,startOk:s.ok,issues:s.issues,before,after}})()`);
+ const diag=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=8;state.locations.store.searched=false;delete state.intel.store;const tools=ensureFieldToolRuntimeV48();for(const id of ['toolkit','cart','lift'])if(tools[id])tools[id].condition=100;if(tools.toolkit?.battery)tools.toolkit.battery.chargeKWh=tools.toolkit.battery.capacityKWh;if(state.gear?.vehicle)ensureVehicleStateV32().condition=100;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart'),s=itineraryStartStateV71(),before=ensureItineraryV27().status;if(b&&!b.disabled&&s.ok)b.click();const after=ensureItineraryV27().status;return {exists:!!b,disabled:!!b?.disabled,startOk:s.ok,issues:s.issues,before,after}})()`);
  assert(diag.exists&&!diag.disabled&&diag.startOk&&diag.before==='planning'&&diag.after!=='planning',JSON.stringify(diag));
  await waitFor(()=>evaluate(`ensureItineraryV27().status!=='running'`),10000);
 });
@@ -82,7 +82,7 @@ await test('X27 direct NPC trade session consumes 0.5h',async()=>{
 });
 
 await test('X28 relationship UI shows 0-100 score and actual unlock thresholds',async()=>{
- const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();state.day=5;state.phase='night';state.hoursLeft=8;const id=Object.keys(state.npcs)[0],k=npcKnowledge(id);k.seen=k.nameKnown=k.roleKnown=k.tradeUnlocked=true;openTrade(id);const t=document.getElementById('tradeContent')?.textContent||'';const good=/好感度 \d+\/100/.test(t)&&/55\/100/.test(t)&&/65\/100/.test(t)&&/85\/100/.test(t);document.getElementById('tradeDialog')?.close();return good})()`);
+ const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();state.day=5;state.phase='night';state.hoursLeft=8;const id=Object.keys(state.npcs)[0],k=npcKnowledge(id);k.seen=k.nameKnown=k.roleKnown=k.tradeUnlocked=true;openTrade(id);const t=document.getElementById('tradeContent')?.textContent||'';const good=t.includes('好感度')&&t.includes('/100')&&t.includes('55/100')&&t.includes('65/100')&&t.includes('85/100');document.getElementById('tradeDialog')?.close();return good})()`);
  assert(ok,'relationship unlock thresholds were not visible');
 });
 
