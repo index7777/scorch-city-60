@@ -16,9 +16,9 @@ async function evaluate(expression){const r=await send('Runtime.evaluate',{expre
 await send('Runtime.enable');
 await waitFor(()=>evaluate(`document.readyState==='complete'&&document.getElementById('demoEntryStatus')?.textContent.includes('Demo 已就緒')`),30000);
 await evaluate(`document.getElementById('demoStart').click()`);
-await waitFor(()=>evaluate(`window.__SCORCH_ENTRY_ACTIVE===false&&typeof goToV113==='function'&&typeof ensureExplorationV113==='function'`));
+await waitFor(()=>evaluate(`window.__SCORCH_ENTRY_ACTIVE===false&&typeof goToV113==='function'&&typeof ensureExplorationV113==='function'&&typeof renderMapV118==='function'`));
 
-const opening=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {flag:!!s.flags?.hardFogOpeningV112,current:s.explorationV113?.current,known:s.explorationV113?.discovered||[],ids:[...m.querySelectorAll('[data-step-go]')].map(x=>x.dataset.stepGo),text:m.innerText,plannerHidden:document.getElementById('mapPlannerPanel')?.hidden===true,mapToolsHidden:document.querySelector('.map-tools')?.hidden===true};})()`);
+const opening=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {flag:!!s.flags?.hardFogOpeningV112,current:s.explorationV113?.current,known:s.explorationV113?.discovered||[],ids:[...m.querySelectorAll('[data-select-v118]')].map(x=>x.dataset.selectV118),text:m.innerText,plannerHidden:document.getElementById('mapPlannerPanel')?.hidden===true,mapToolsHidden:document.querySelector('.map-tools')?.hidden===true};})()`);
 assert(opening.flag,'hard-fog opening flag missing');
 assert(opening.current==='base','opening exploration position is not shelter');
 assert(opening.known.length===1&&opening.known[0]==='base','opening discovered-location state leaked');
@@ -28,16 +28,33 @@ assert(!opening.text.includes('住宅區')&&!opening.text.includes('便利商店
 assert(opening.plannerHidden&&opening.mapToolsHidden,'legacy route-planning UI is visible');
 console.log('PASS B6 hard-fog stepwise exploration shell');
 
-const before=await evaluate(`qaStateV84().hoursLeft`);
-await evaluate(`document.querySelector('[data-step-go="homes"]').click()`);
+const beforeSelect=await evaluate(`qaStateV84().hoursLeft`);
+await evaluate(`document.querySelector('[data-select-v118="homes"]').click()`);
+const selected=await evaluate(`(()=>{const s=qaStateV84(),p=document.querySelector('.step-selection-v118');return {hours:s.hoursLeft,current:s.explorationV113?.current,text:p?.innerText||'',hasGo:!!p?.querySelector('[data-go-v118="homes"]')};})()`);
+assert(selected.hours===beforeSelect,'selecting a destination consumed time');
+assert(selected.current==='base','selecting a destination moved immediately');
+assert(selected.hasGo,'travel confirmation control missing');
+assert(/預計\s*1h/.test(selected.text),'travel estimate missing');
+console.log('PASS B1 destination selection requires confirmation and costs no time');
+
+await evaluate(`document.querySelector('[data-go-v118="homes"]').click()`);
 await waitFor(()=>evaluate(`qaStateV84().explorationV113?.current==='homes'`));
-const arrived=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {hours:s.hoursLeft,known:s.explorationV113.discovered||[],ids:[...m.querySelectorAll('[data-step-go]')].map(x=>x.dataset.stepGo),text:m.innerText};})()`);
+const arrived=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {hours:s.hoursLeft,known:s.explorationV113.discovered||[],ids:[...m.querySelectorAll('[data-select-v118]')].map(x=>x.dataset.selectV118),text:m.innerText,hasExplore:!!m.querySelector('[data-explore-v118]')};})()`);
 assert(arrived.known.includes('homes'),'arrival did not unlock destination');
 assert(arrived.text.includes('住宅區'),'arrived location name not revealed');
-assert(arrived.ids.includes('store')&&arrived.ids.includes('school'),'arrival did not unlock next-layer neighbors');
-assert(!arrived.text.includes('便利商店')&&!arrived.text.includes('社區中心'),'new neighbor identity leaked before arrival');
-assert(arrived.hours<before,'stepwise travel did not consume time');
-console.log('PASS B1/B2 stepwise travel executes and reveals only next layer');
+assert(!arrived.ids.includes('store')&&!arrived.ids.includes('school'),'arrival leaked next-layer neighbors before exploration');
+assert(arrived.hasExplore,'arrival did not offer explicit exploration');
+assert(arrived.hours<beforeSelect,'confirmed travel did not consume time');
+console.log('PASS B2 confirmed travel arrives without auto-exploring');
+
+const beforeExplore=arrived.hours;
+await evaluate(`document.querySelector('[data-explore-v118]').click()`);
+await waitFor(()=>evaluate(`qaStateV84().explorationV118?.explored?.includes('homes')`));
+const explored=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {hours:s.hoursLeft,ids:[...m.querySelectorAll('[data-select-v118]')].map(x=>x.dataset.selectV118),text:m.innerText};})()`);
+assert(explored.ids.includes('store')&&explored.ids.includes('school'),'exploration did not reveal local neighboring silhouettes');
+assert(!explored.text.includes('便利商店')&&!explored.text.includes('社區中心'),'exploration leaked unknown neighbor identity');
+assert(explored.hours<beforeExplore,'exploration did not consume time');
+console.log('PASS B3 explicit exploration reveals silhouettes only');
 
 const zero=await evaluate(`(()=>{const s=qaStateV84();return Object.values(s.resources||{}).every(v=>Number(v)===0)&&s.backpack?.capacityKg===50&&s.backpack?.singleItemLimitKg===20&&s.shelterStorage?.capacityKg===200&&s.shelterPower?.outlets===1})()`);
 assert(zero,'opening physical limits/resources are inconsistent');
