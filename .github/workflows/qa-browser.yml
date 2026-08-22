@@ -24,6 +24,7 @@ jobs:
         run: |
           node --check qa/browser-smoke.mjs
           node --check qa/resident-fog-smoke.mjs
+          node --check qa/resident-p0-smoke.mjs
 
       - name: Run rendered Chromium smoke tests
         shell: bash
@@ -63,3 +64,4 @@ jobs:
 
           node qa/browser-smoke.mjs
           node qa/resident-fog-smoke.mjs
+          node qa/resident-p0-smoke.mjs
