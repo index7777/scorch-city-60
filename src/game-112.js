@@ -55,19 +55,15 @@
   const left=document.querySelector('.left-panel');
   if(!left)return;
   const safeSel='.hard-fog-backpack-v112,.hard-fog-shelter-v112,.hard-fog-power-v112';
-  const roots=[...left.children,...left.querySelectorAll('#resources>* , #baseStats>* , .left-utility>*')];
-  for(const root of roots){
-   if(!root?.isConnected||root.matches?.(safeSel)||root.closest?.(safeSel))continue;
-   const text=(root.innerText||root.textContent||'').trim();
-   if(OPENING_UI_LEAKS_V112.some(leak=>text.includes(leak)))root.remove();
-  }
-  for(const el of [...left.querySelectorAll('*')]){
-   if(!el.isConnected||el.matches?.(safeSel)||el.closest?.(safeSel))continue;
-   const own=(el.innerText||el.textContent||'').trim();
-   if(!OPENING_UI_LEAKS_V112.some(leak=>own.includes(leak)))continue;
-   let row=el;
-   while(row.parentElement&&row.parentElement!==left&&!['resources','baseStats'].includes(row.parentElement.id))row=row.parentElement;
-   if(row.isConnected)row.remove();
+  for(const el of left.querySelectorAll('*')){
+   if(el.closest(safeSel)||el.children.length)continue;
+   const text=(el.textContent||'').trim();
+   if(!OPENING_UI_LEAKS_V112.some(leak=>text.includes(leak)))continue;
+   const row=el.closest('.card,.resource-row,.resource-item,.stat-row,.kv,li')||el;
+   if(row.closest(safeSel))continue;
+   row.hidden=true;
+   row.setAttribute('aria-hidden','true');
+   row.style.display='none';
   }
  }
  function hideFutureUiV112(){
