@@ -11,9 +11,9 @@ assert(targets?.webSocketDebuggerUrl,'no Chrome page target');
 const ws=new WebSocket(targets.webSocketDebuggerUrl);
 await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})});
 let seq=0;const pending=new Map(),exceptions=[];
-ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(new Error(m.error.message)):resolve(m.result)}else if(m.method==='Runtime.exceptionThrown'){exceptions.push(m.params?.exceptionDetails?.text||'Runtime exception')}});
+ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(new Error(m.error.message)):resolve(m.result)}else if(m.method==='Runtime.exceptionThrown'){const d=m.params?.exceptionDetails;exceptions.push(d?.exception?.description||d?.text||'Runtime exception')}});
 function send(method,params={}){return new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}))})}
-async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'evaluate exception');return r.result?.value}
+async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails){const d=r.exceptionDetails,desc=d.exception?.description||d.text||'evaluate exception';throw new Error(desc)}return r.result?.value}
 async function test(name,fn){await fn();console.log(`PASS ${name}`)}
 
 await send('Runtime.enable');await send('Page.enable');
