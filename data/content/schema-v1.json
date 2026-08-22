@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scorch-city-60.local/schema/content-v1.json",
+  "title": "Scorch City Content Model v1",
+  "type": "object",
+  "required": ["items", "npcs", "intelligence", "clues", "deductions", "events", "conversationTopics", "relationships", "tradeOffers", "endingRoutes"],
+  "properties": {
+    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "npcs": {"type": "array", "items": {"$ref": "#/$defs/npc"}},
+    "intelligence": {"type": "array", "items": {"$ref": "#/$defs/intelligence"}},
+    "clues": {"type": "array", "items": {"$ref": "#/$defs/clue"}},
+    "deductions": {"type": "array", "items": {"$ref": "#/$defs/deduction"}},
+    "events": {"type": "array", "items": {"$ref": "#/$defs/event"}},
+    "conversationTopics": {"type": "array", "items": {"$ref": "#/$defs/topic"}},
+    "relationships": {"type": "array", "items": {"$ref": "#/$defs/relationship"}},
+    "tradeOffers": {"type": "array", "items": {"$ref": "#/$defs/tradeOffer"}},
+    "endingRoutes": {"type": "array", "items": {"$ref": "#/$defs/endingRoute"}}
+  },
+  "$defs": {
+    "knowledgeGate": {
+      "type": "object",
+      "required": ["kind", "ids"],
+      "properties": {
+        "kind": {"enum": ["observed", "heard", "verified", "clue", "deduction", "relationship", "discovered"]},
+        "ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      },
+      "additionalProperties": false
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "name", "categoryInternal", "weightKg", "heatClass", "finiteStock"],
+      "properties": {
+        "id": {"type": "string"}, "name": {"type": "string"}, "categoryInternal": {"type": "string"},
+        "weightKg": {"type": "number", "minimum": 0}, "heatClass": {"type": "string"},
+        "finiteStock": {"const": true}, "uses": {"type": "array", "items": {"type": "string"}},
+        "discoveryTags": {"type": "array", "items": {"type": "string"}}, "sourceIds": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "npc": {
+      "type": "object",
+      "required": ["id", "name", "needs", "goals", "inventory", "knowledgeIds", "survivalPolicy", "tradePolicy"],
+      "properties": {
+        "id": {"type": "string"}, "name": {"type": "string"}, "origin": {"type": "string"}, "profession": {"type": "string"},
+        "needs": {"type": "array", "items": {"type": "string"}}, "goals": {"type": "array", "items": {"type": "string"}},
+        "fears": {"type": "array", "items": {"type": "string"}}, "inventory": {"type": "array", "items": {"type": "string"}},
+        "knowledgeIds": {"type": "array", "items": {"type": "string"}}, "survivalPolicy": {"type": "object"},
+        "travelPolicy": {"type": "object"}, "tradePolicy": {"type": "object"}, "conversationTopics": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "intelligence": {
+      "type": "object",
+      "required": ["id", "claim", "sourceType", "sourceId", "reliability", "verificationState"],
+      "properties": {
+        "id": {"type": "string"}, "claim": {"type": "string"}, "sourceType": {"type": "string"}, "sourceId": {"type": "string"},
+        "reliability": {"type": "number", "minimum": 0, "maximum": 1}, "observedAt": {"type": ["string", "null"]},
+        "expiresOrStales": {"type": ["string", "null"]}, "verificationState": {"enum": ["unverified", "partially-verified", "verified", "false", "stale"]},
+        "reveals": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "clue": {
+      "type": "object",
+      "required": ["id", "evidence", "sourceId", "deductionLinks"],
+      "properties": {
+        "id": {"type": "string"}, "evidence": {"type": "string"}, "sourceId": {"type": "string"},
+        "requiredObservation": {"$ref": "#/$defs/knowledgeGate"}, "deductionLinks": {"type": "array", "items": {"type": "string"}},
+        "reveals": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "deduction": {
+      "type": "object",
+      "required": ["id", "statement", "requiredClueSets", "unlocks"],
+      "properties": {
+        "id": {"type": "string"}, "statement": {"type": "string"},
+        "requiredClueSets": {"type": "array", "items": {"type": "array", "items": {"type": "string"}, "minItems": 1}, "minItems": 1},
+        "optionalSupport": {"type": "array", "items": {"type": "string"}}, "unlocks": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "scope", "trigger", "effects", "playerVisibilityRule"],
+      "properties": {
+        "id": {"type": "string"}, "scope": {"enum": ["micro", "local", "social", "world", "ending"]},
+        "trigger": {"type": "object"}, "participants": {"type": "array", "items": {"type": "string"}},
+        "preconditions": {"type": "array", "items": {"type": "object"}}, "effects": {"type": "array", "items": {"type": "object"}},
+        "playerVisibilityRule": {"type": "object"}, "followups": {"type": "array", "items": {"type": "string"}},
+        "repeatable": {"type": "boolean", "default": false}
+      },
+      "additionalProperties": true
+    },
+    "topic": {
+      "type": "object",
+      "required": ["id", "npcId", "topicKey", "availability", "npcResponseVariants"],
+      "properties": {
+        "id": {"type": "string"}, "npcId": {"type": "string"}, "topicKey": {"type": "string"},
+        "availability": {"type": "array", "items": {"$ref": "#/$defs/knowledgeGate"}}, "playerPrompt": {"type": "string"},
+        "npcResponseVariants": {"type": "array", "items": {"type": "object"}}, "knowledgeEffects": {"type": "array", "items": {"type": "string"}},
+        "relationshipEffects": {"type": "array", "items": {"type": "object"}}
+      },
+      "additionalProperties": true
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["fromNpc", "toNpc", "knownToPlayer", "affinity", "trust"],
+      "properties": {
+        "fromNpc": {"type": "string"}, "toNpc": {"type": "string"}, "knownToPlayer": {"type": "boolean"},
+        "affinity": {"type": "number"}, "trust": {"type": "number"}, "obligation": {"type": "number"}, "conflict": {"type": "number"},
+        "history": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "tradeOffer": {
+      "type": "object",
+      "required": ["id", "ownerId", "offeredAssets", "requestedAssetsOrConditions", "locationId", "escrowState", "visibilityRule"],
+      "properties": {
+        "id": {"type": "string"}, "ownerId": {"type": "string"}, "offeredAssets": {"type": "array", "items": {"type": "object"}},
+        "requestedAssetsOrConditions": {"type": "array", "items": {"type": "object"}}, "locationId": {"type": "string"},
+        "escrowState": {"enum": ["none", "held", "completed", "returned", "lost"]}, "expires": {"type": ["string", "null"]},
+        "visibilityRule": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "endingRoute": {
+      "type": "object",
+      "required": ["id", "hiddenName", "requiredDeductions", "requiredAssets", "requiredWorldState", "executionSteps", "resolution"],
+      "properties": {
+        "id": {"type": "string"}, "hiddenName": {"type": "string"}, "requiredDeductions": {"type": "array", "items": {"type": "string"}},
+        "requiredPeopleOrSkills": {"type": "array", "items": {"type": "string"}}, "requiredAssets": {"type": "array", "items": {"type": "string"}},
+        "requiredWorldState": {"type": "array", "items": {"type": "object"}}, "executionSteps": {"type": "array", "items": {"type": "object"}},
+        "failureModes": {"type": "array", "items": {"type": "string"}}, "resolution": {"type": "object"}
+      },
+      "additionalProperties": true
+    }
+  }
+}
