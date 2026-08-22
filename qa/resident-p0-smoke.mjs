@@ -18,7 +18,7 @@ const result=await evaluate(`(()=>{
  state.day=1;state.phase='night';state.hoursLeft=8;state.knownCore=false;if(state.base)state.base.core=false;
  state.onboarding.enabled=false;state.onboarding.completed=true;
  state.knowledge=state.knowledge||{};state.knowledge.contacts=[];state.knowledge.heardSettlements=[];
- for(const loc of locations){if(loc.id!=='base'&&state.locations?.[loc.id])state.locations[loc.id].searched=false}
+ for(const id of Object.keys(state.locations||{})){if(id!=='base')state.locations[id].searched=false}
  state.intel={};render();
  const coreBtn=document.getElementById('coreProjectBtn');
  const bottom=[...document.querySelectorAll('.bottom-strip>div')];
