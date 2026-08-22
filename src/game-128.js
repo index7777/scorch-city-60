@@ -41,6 +41,7 @@
  }
  function renderCommunityRequestsV128(){
   if(!state.flags?.hardFogOpeningV112)return;const map=document.getElementById('map');if(!map)return;map.querySelectorAll('.community-request-v128').forEach(el=>el.remove());
+  if(typeof renderSocialV122==='function')renderSocialV122();
   for(const id of Object.keys(COMMUNITY_REQUESTS_V128)){
    const req=visibleCommunityRequestV128(id);if(!req)continue;const card=map.querySelector(`.social-card-v122[data-social-npc-v122="${id}"]`);if(!card)continue;
    const box=document.createElement('section');box.className='community-request-v128';box.setAttribute('aria-label','對方提出的需求');
