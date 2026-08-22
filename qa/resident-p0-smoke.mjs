@@ -18,6 +18,8 @@ const result=await evaluate(`(()=>{
  state.day=1;state.phase='night';state.hoursLeft=8;state.knownCore=false;if(state.base)state.base.core=false;
  state.onboarding.enabled=false;state.onboarding.completed=true;
  state.knowledge=state.knowledge||{};state.knowledge.contacts=[];state.knowledge.heardSettlements=[];
+ state.knowledge.scoutedLocations={base:{day:1,method:'起點'}};
+ state.knowledge.observedLocations={base:{day:1,method:'起點'}};
  for(const id of Object.keys(state.locations||{})){if(id!=='base')state.locations[id].searched=false}
  state.intel={};render();
  const coreBtn=document.getElementById('coreProjectBtn');
@@ -33,6 +35,7 @@ const result=await evaluate(`(()=>{
  if(sid){
   const s=state.settlements[sid];
   if(s?.location&&state.locations?.[s.location])state.locations[s.location].searched=false;
+  if(s?.location){delete state.knowledge.scoutedLocations[s.location];delete state.knowledge.observedLocations[s.location]}
   openSettlements();
   const dlg=document.getElementById('settlementDialog');
   const text=dlg?.textContent||'';
