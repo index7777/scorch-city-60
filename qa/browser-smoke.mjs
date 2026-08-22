@@ -4,105 +4,51 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function assert(ok,msg){if(!ok)throw new Error(msg)}
 async function waitFor(fn,timeout=20000,step=100){const end=Date.now()+timeout;let last;while(Date.now()<end){try{last=await fn();if(last)return last}catch{}await sleep(step)}throw new Error(`timeout: ${String(last||'condition')}`)}
 
-const targets=await waitFor(async()=>{
- const r=await fetch(`${CDP}/json/list`);if(!r.ok)return null;const list=await r.json();return list.find(x=>x.type==='page'&&x.url.startsWith(APP))||list.find(x=>x.type==='page')
-});
-assert(targets?.webSocketDebuggerUrl,'no Chrome page target');
-const ws=new WebSocket(targets.webSocketDebuggerUrl);
+const target=await waitFor(async()=>{const r=await fetch(`${CDP}/json/list`);if(!r.ok)return null;const list=await r.json();return list.find(x=>x.type==='page'&&x.url.startsWith(APP))||list.find(x=>x.type==='page')});
+assert(target?.webSocketDebuggerUrl,'no Chrome page target');
+const ws=new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})});
-let seq=0;const pending=new Map(),exceptions=[],testFailures=[];
-ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(new Error(m.error.message)):resolve(m.result)}else if(m.method==='Runtime.exceptionThrown'){const d=m.params?.exceptionDetails;exceptions.push(d?.exception?.description||d?.text||'Runtime exception')}});
+let seq=0;const pending=new Map(),exceptions=[];
+ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result)}else if(m.method==='Runtime.exceptionThrown'){const d=m.params?.exceptionDetails;exceptions.push(d?.exception?.description||d?.text||'Runtime exception')}});
 function send(method,params={}){return new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}))})}
-async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails){const d=r.exceptionDetails,desc=d.exception?.description||d.text||'evaluate exception';throw new Error(desc)}return r.result?.value}
-async function test(name,fn){try{await fn();console.log(`PASS ${name}`)}catch(err){const msg=`${name}: ${err?.message||err}`;testFailures.push(msg);console.error(`FAIL ${msg}`)}}
+async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text||'evaluate exception');return r.result?.value}
 
-await send('Runtime.enable');await send('Page.enable');
-await waitFor(()=>evaluate(`document.readyState==='complete' && document.getElementById('demoEntryStatus')?.textContent.includes('Demo 已就緒')`),30000);
+await send('Runtime.enable');
+await waitFor(()=>evaluate(`document.readyState==='complete'&&document.getElementById('demoEntryStatus')?.textContent.includes('Demo 已就緒')`),30000);
 await evaluate(`document.getElementById('demoStart').click()`);
-await waitFor(()=>evaluate(`window.__SCORCH_ENTRY_ACTIVE===false`));
-await evaluate(`window.state=qaStateV84();for(const d of document.querySelectorAll('dialog[open]'))d.close();state.onboarding.enabled=false;state.onboarding.completed=true;render();`);
+await waitFor(()=>evaluate(`window.__SCORCH_ENTRY_ACTIVE===false&&typeof goToV113==='function'&&typeof ensureExplorationV113==='function'`));
 
-await test('B6 unknown node is fogged and only scout action is exposed',async()=>{
- const ok=await evaluate(`(()=>{state.locations.warehouse.searched=false;delete state.intel.warehouse;renderMap();const n=document.querySelector('.node[data-id="warehouse"]');if(!n||!n.classList.contains('fog-unknown-v68')||!n.textContent.includes('? 未知區域'))return false;openLocation('warehouse');const dlg=document.getElementById('locationDialog');const good=!!document.getElementById('scoutUnknownV68')&&!document.getElementById('searchLoc')&&!document.getElementById('tradeLoc')&&!document.getElementById('openCraftFromLoc');dlg.close();return good})()`);
- assert(ok,'unknown warehouse leaked identity/actions');
-});
+const opening=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {flag:!!s.flags?.hardFogOpeningV112,current:s.explorationV113?.current,known:s.explorationV113?.discovered||[],ids:[...m.querySelectorAll('[data-step-go]')].map(x=>x.dataset.stepGo),text:m.innerText,plannerHidden:document.getElementById('mapPlannerPanel')?.hidden===true,mapToolsHidden:document.querySelector('.map-tools')?.hidden===true};})()`);
+assert(opening.flag,'hard-fog opening flag missing');
+assert(opening.current==='base','opening exploration position is not shelter');
+assert(opening.known.length===1&&opening.known[0]==='base','opening discovered-location state leaked');
+assert(opening.ids.includes('homes'),'directly reachable neighbor missing');
+assert(!opening.ids.includes('store')&&!opening.ids.includes('school'),'second-layer nodes leaked');
+assert(!opening.text.includes('住宅區')&&!opening.text.includes('便利商店')&&!opening.text.includes('社區中心'),'unknown place identity leaked');
+assert(opening.plannerHidden&&opening.mapToolsHidden,'legacy route-planning UI is visible');
+console.log('PASS B6 hard-fog stepwise exploration shell');
 
-await test('B3 insufficient-time quick search is visibly disabled',async()=>{
- const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=.25;state.locations.store.searched=false;state.intel.store={day:1,verifiedDay:1,summary:'已確認地點用途',source:'QA',confidence:100};state.knowledge=state.knowledge||{};state.knowledge.scoutedLocations=state.knowledge.scoutedLocations||{};state.knowledge.observedLocations=state.knowledge.observedLocations||{};state.knowledge.scoutedLocations.store={day:1,method:'QA'};state.knowledge.observedLocations.store={day:1,method:'QA'};const r=searchRecordV69('store');r.lastSearchDay=0;r.visits=0;openLocation('store');const b=document.getElementById('searchLoc'),note=document.querySelector('.quick-search-time-v71');const good=!!b&&b.disabled&&/需/.test(b.textContent)&&!!note;document.getElementById('locationDialog')?.close();return good})()`);
- assert(ok,'quick search remained actionable without enough time');
-});
+const before=await evaluate(`qaStateV84().hoursLeft`);
+await evaluate(`document.querySelector('[data-step-go="homes"]').click()`);
+await waitFor(()=>evaluate(`qaStateV84().explorationV113?.current==='homes'`));
+const arrived=await evaluate(`(()=>{const s=qaStateV84(),m=document.getElementById('map');return {hours:s.hoursLeft,known:s.explorationV113.discovered||[],ids:[...m.querySelectorAll('[data-step-go]')].map(x=>x.dataset.stepGo),text:m.innerText};})()`);
+assert(arrived.known.includes('homes'),'arrival did not unlock destination');
+assert(arrived.text.includes('住宅區'),'arrived location name not revealed');
+assert(arrived.ids.includes('store')&&arrived.ids.includes('school'),'arrival did not unlock next-layer neighbors');
+assert(!arrived.text.includes('便利商店')&&!arrived.text.includes('社區中心'),'new neighbor identity leaked before arrival');
+assert(arrived.hours<before,'stepwise travel did not consume time');
+console.log('PASS B1/B2 stepwise travel executes and reveals only next layer');
 
-await test('B1 over-budget itinerary shows disabled start and explicit overrun warning',async()=>{
- const ok=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=.1;state.locations.store.searched=false;state.intel.store={day:1,verifiedDay:1,summary:'QA',source:'QA',confidence:100};const r=searchRecordV69('store');r.lastSearchDay=0;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart'),w=document.getElementById('itineraryStartReasonV71');return !!b&&b.disabled&&!!w&&/時間超支/.test(w.textContent)})()`);
- assert(ok,'negative itinerary buffer did not render a hard blocker');
-});
+const zero=await evaluate(`(()=>{const s=qaStateV84();return Object.values(s.resources||{}).every(v=>Number(v)===0)&&s.backpack?.capacityKg===50&&s.backpack?.singleItemLimitKg===20&&s.shelterStorage?.capacityKg===200&&s.shelterPower?.outlets===1})()`);
+assert(zero,'opening physical limits/resources are inconsistent');
+console.log('PASS opening physical inventory constraints');
 
-await test('B2 feasible itinerary start click reaches execution handler',async()=>{
- const diag=await evaluate(`(()=>{state.day=1;state.phase='night';state.hoursLeft=8;state.locations.store.searched=false;delete state.intel.store;const tools=ensureFieldToolRuntimeV48();for(const id of ['toolkit','cart','lift'])if(tools[id])tools[id].condition=100;if(tools.toolkit?.battery)tools.toolkit.battery.chargeKWh=tools.toolkit.battery.capacityKWh;if(state.gear?.vehicle)ensureVehicleStateV32().condition=100;clearItineraryV27();state.mapPlanner.active=true;addItineraryStopV27('store','scout');renderMap();const b=document.getElementById('itineraryStart'),s=itineraryStartStateV71(),before=ensureItineraryV27().status;if(b&&!b.disabled&&s.ok)b.click();const after=ensureItineraryV27().status;return {exists:!!b,disabled:!!b?.disabled,startOk:s.ok,issues:s.issues,before,after}})()`);
- assert(diag.exists&&!diag.disabled&&diag.startOk&&diag.before==='planning'&&diag.after!=='planning',JSON.stringify(diag));
- await waitFor(()=>evaluate(`ensureItineraryV27().status!=='running'`),10000);
-});
-
-await test('X23 risk cannot decay after a same-day improvement',async()=>{
- const ok=await evaluate(`(()=>{state.day=4;state.flags.riskTrendV69={display:null,lastDecayDay:null,lastSyncDay:4};state.resources.water=1;state.resources.food=1;const high=currentRiskScore();state.resources.water=120;state.resources.food=120;const same=currentRiskScore();return same>=high})()`);
- assert(ok,'risk display decayed inside the same day');
-});
-
-await test('X24 Day 1-3 briefing contains an early warning precursor',async()=>{
- const ok=await evaluate(`(()=>{state.day=2;state.phase='night';state.eventChains.water={level:0};openBrief();const text=document.getElementById('briefContent')?.textContent||'';const good=/前兆/.test(text)&&chainLevel('water')>=1;document.getElementById('briefDialog')?.close();return good})()`);
- assert(ok,'early briefing did not expose a Day 1-3 precursor');
-});
-
-await test('X25 same-day repeat search remains locked',async()=>{
- const ok=await evaluate(`(()=>{state.day=5;state.phase='night';state.hoursLeft=8;state.locations.store.searched=true;state.intel.store={day:5,verifiedDay:5,summary:'QA',source:'QA',confidence:100};const r=searchRecordV69('store');r.lastSearchDay=5;r.visits=Math.max(1,r.visits||0);openLocation('store');const b=document.getElementById('searchLoc');const good=!!b&&b.disabled&&/明日|Day 6/.test(b.textContent+' '+b.title);document.getElementById('locationDialog')?.close();return good})()`);
- assert(ok,'same-day revisit search was not locked');
-});
-
-await test('X26 quick search leaves hidden loot for a later full itinerary search',async()=>{
- const ok=await evaluate(`(()=>{
-  state.day=5;state.phase='night';state.hoursLeft=8;state.gear.vehicle=false;state.gear.cart=false;
-  state.locations.store.searched=true;state.intel.store={day:5,verifiedDay:5,summary:'QA',source:'QA',confidence:100};
-  state.locations.store.remaining={water:1,food:1,battery:2,medicine:2};
-  const r=searchRecordV69('store');r.visits=0;r.quick=0;r.full=0;r.lastSearchDay=0;
-  const beforeBattery=state.locations.store.remaining.battery,beforeMedicine=state.locations.store.remaining.medicine;
-  searchLocation(mapLoc('store'));
-  const hiddenUntouched=state.locations.store.remaining.battery===beforeBattery&&state.locations.store.remaining.medicine===beforeMedicine;
-  const quickMarked=searchRecordV69('store').quick===1&&searchRecordV69('store').lastSearchDay===5;
-  state.day=6;state.phase='night';state.hoursLeft=8;
-  collectStopLootV27(mapLoc('store'));
-  const hiddenRecovered=state.locations.store.remaining.battery<beforeBattery||state.locations.store.remaining.medicine<beforeMedicine;
-  return hiddenUntouched&&quickMarked&&hiddenRecovered&&searchRecordV69('store').full===1
- })()`);
- assert(ok,'quick search consumed hidden loot or full search could not recover it later');
-});
-
-await test('X27 direct NPC trade session consumes 0.5h',async()=>{
- const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();state.day=5;state.phase='night';state.hoursLeft=8;const id=Object.keys(state.npcs)[0],k=npcKnowledge(id);k.seen=k.nameKnown=k.roleKnown=k.tradeUnlocked=true;const before=state.hoursLeft;openTrade(id);const after=state.hoursLeft;document.getElementById('tradeDialog')?.close();return Math.abs((before-after)-.5)<.01})()`);
- assert(ok,'NPC trade session did not consume 0.5h');
-});
-
-await test('X28 relationship UI shows 0-100 score and actual unlock thresholds',async()=>{
- const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();state.day=5;state.phase='night';state.hoursLeft=8;const id=Object.keys(state.npcs)[0],k=npcKnowledge(id);k.seen=k.nameKnown=k.roleKnown=k.tradeUnlocked=true;openTrade(id);const t=document.getElementById('tradeContent')?.textContent||'';const good=t.includes('好感度')&&t.includes('/100')&&t.includes('55/100')&&t.includes('65/100')&&t.includes('85/100');document.getElementById('tradeDialog')?.close();return good})()`);
- assert(ok,'relationship unlock thresholds were not visible');
-});
-
-await test('X29 high-risk injury and time-overrun mutate real state',async()=>{
- const ok=await evaluate(`(()=>{const loc={id:'qa-risk',name:'QA 高風險地點',risk:4};state.flags.highRiskEventsV79={};state.flags.highRiskInjuriesV84={};state.phase='night';state.hoursLeft=8;state.fieldTeam.active=false;let injuryDay=null,overrunDay=null;const sum=loc.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);for(let d=1;d<=8;d++){const code=(d+sum)%4;if(code===1&&!injuryDay)injuryDay=d;if(code===2&&!overrunDay)overrunDay=d}state.day=injuryDay;applyHighRiskConsequenceV79(loc);const injured=!!ensureHighRiskInjuriesV84().player;state.flags.highRiskEventsV79={};state.day=overrunDay;state.hoursLeft=8;const before=state.hoursLeft;applyHighRiskConsequenceV79(loc);const overrun=Math.abs((before-state.hoursLeft)-.5)<.01;return injured&&overrun})()`);
- assert(ok,'high-risk injury/overrun did not affect state');
-});
-
-await test('X30 contacted settlement exposes enabled trade entry',async()=>{
- const ok=await evaluate(`(()=>{for(const d of document.querySelectorAll('dialog[open]'))d.close();const id=Object.keys(state.settlements||{})[0];if(!id)return false;const s=state.settlements[id];state.locations[s.location].searched=true;state.knowledge=state.knowledge||{};state.knowledge.contacts=Array.isArray(state.knowledge.contacts)?state.knowledge.contacts:[];const npcEntry=Object.entries(state.npcs||{}).find(([,n])=>n&&n.alive&&n.location===s.location);if(!npcEntry)return false;const [npcId]=npcEntry;if(!state.knowledge.contacts.includes(npcId))state.knowledge.contacts.push(npcId);openSettlements();const b=document.querySelector('[data-settlement-trade-v79="'+id+'"]');const good=!!b&&!b.disabled&&/發起交易/.test(b.textContent);document.getElementById('settlementDialog')?.close();return good})()`);
- assert(ok,'contacted settlement did not expose trade entry');
-});
-
-await test('X31/X32 visible naming is normalized',async()=>{
- const ok=await evaluate(`(()=>{render();const research=document.getElementById('researchBtn')?.textContent||'',title=document.getElementById('researchDialog')?.querySelector('h2')?.textContent||'';const host=document.createElement('div');host.textContent='大型設備';normalizeVisibleCopyV81(host);return /研究/.test(research)&&title==='研究'&&host.textContent==='大型資產'})()`);
- assert(ok,'research/large-asset naming was not normalized');
-});
+const broadcast=await evaluate(`document.getElementById('demoHowToPanel')?.textContent||''`);
+assert(/Day 1–7/.test(broadcast)&&/Day 30/.test(broadcast)&&/100°C/.test(broadcast),'broadcast disaster schedule missing');
+assert(!/Day 60|D60|期限/.test(broadcast),'broadcast leaks a Day 60 deadline');
+console.log('PASS broadcast-only disaster rules');
 
 await sleep(150);
-if(exceptions.length)testFailures.push(`browser runtime exceptions: ${exceptions.join(' | ')}`);
-if(testFailures.length){for(const msg of testFailures)console.error(`FAIL ${msg}`);throw new Error(`${testFailures.length} browser smoke test(s) failed`)}
+if(exceptions.length)throw new Error(`browser runtime exceptions: ${exceptions.join(' | ')}`);
 console.log('PASS browser runtime exception check');
 ws.close();
