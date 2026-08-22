@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
 const read = p => fs.readFileSync(p, 'utf8');
-const modules = fs.readdirSync('src').filter(n => /^game-\d{2}\.js$/.test(n)).sort();
+const modules = fs.readdirSync('src').filter(n => /^game-\d{2,}\.js$/.test(n)).sort((a,b)=>Number(a.match(/\d+/)[0])-Number(b.match(/\d+/)[0]));
 const src = modules.map(n => read(`src/${n}`)).join('\n');
 const failures = [];
 const pass = [];
@@ -71,6 +71,15 @@ expect('X32 large asset naming unified', hasAll("replace(/大型設備/g,'大型
 // B9–B11 — one canonical risk vocabulary/source.
 expect('B9-B11 canonical risk bands', hasAll('riskBandV73','平靜','警戒','緊張','危險','崩潰'));
 expect('B11 brief uses canonical riskLabel', /整體風險：\$\{riskLabel\(\)\}/.test(src));
+
+// B118 — current hard-fog exploration must select first, confirm travel second, then explore after arrival.
+expect('B118 selection does not auto-travel', hasAll('data-select-v118','ensureV118().selected=id;renderMap()','data-go-v118'));
+expect('B118 confirmed travel is explicit', hasAll('confirmTravelV118','goToV113(target)','>前往</button>'));
+expect('B118 arrival exploration is separate', hasAll('exploreCurrentV118','data-explore-v118','探索 · 1h','ex.observed[base.current]=true'));
+expect('B118 unknown neighbors stay anonymous', hasAll("label=`${directionV118(current,id)}方`","detail='遠處可見輪廓'","目前只能確認道路與遠處輪廓"));
+expect('B118 discovered art uses existing thumbnails', hasAll('assets/districts/thumbnails/${key}.webp','base:\'base\'','store:\'store\'','vent:\'vent\''));
+expect('B118 legacy route/endgame surfaces are suppressed', hasAll("'mapTools'","'mapPlannerPanel'","'coreProjectBtn'","'coreProjectDialog'","'actionCenterBtn'","'actionCenterDialog'"));
+expect('B118 HUD current day has no denominator', hasAll("day.textContent=`Day ${state.day}`"));
 
 for (const name of pass) console.log(`PASS ${name}`);
 if (failures.length) {
