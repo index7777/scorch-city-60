@@ -83,7 +83,7 @@
  function rewriteBroadcastOnlyCopyV112(){
   const entry=document.getElementById('demoEntry');
   const subtitle=entry?.querySelector('.demo-entry__subtitle');
-  if(subtitle)subtitle.textContent='世界廣播公布了完整災害時程。除此之外，沒有提供任何世界資訊。';
+  if(subtitle)subtitle.textContent='世界廣播：完整災害時程';
   const how=entry?.querySelector('#demoHowToPanel');
   if(how)how.innerHTML='<h2>世界廣播</h2><p>Day 1–7：夜晚 8 小時，白晝最高 72°C。</p><p>Day 8–14：夜晚 6 小時，白晝最高 78°C。</p><p>Day 15–21：夜晚 4 小時，白晝最高 84°C。</p><p>Day 22–29：夜晚 2 小時，白晝最高 92°C。</p><p>Day 30 起：夜晚完全消失，白晝最高 100°C。</p>';
   const tut=document.getElementById('tutorialDialog');
